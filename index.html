@@ -492,6 +492,56 @@
             <p>إدارة حسابات الدخول والمشرفين</p>
             <button class="btn-gold" style="background: linear-gradient(135deg,#7f8c8d,#636e72); color:#fff;" onclick="showView('settingsView')">فتح الإعدادات</button>
         </div>
+        <div class="info-card" style="border-color: rgba(52,152,219,0.3);">
+            <div style="font-size: 50px; margin-bottom: 5px;">💾</div>
+            <h3>نسخ احتياطي</h3>
+            <p>تصدير واستيراد البيانات</p>
+            <button class="btn-gold" style="background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;" onclick="showView('backupView')">فتح النسخ</button>
+        </div>
+    </div>
+
+    <!-- قائمة الحسابات المنتهية -->
+    <div id="expiredAccountsView" class="view hidden">
+        <div class="card" style="padding:24px;">
+            <h2 style="text-align:center;margin:0 0 20px;font-size:20px;color:#e74c3c;">⚠️ الحسابات المنتهية</h2>
+            <div id="expiredAccountsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:4px 0;"></div>
+            <span class="back-link" onclick="showView('dashboardView')">← العودة للرئيسي</span>
+        </div>
+    </div>
+
+    <!-- صفحة النسخ الاحتياطي -->
+    <div id="backupView" class="view hidden">
+        <div class="card" style="padding:28px;">
+            <h2 style="text-align:center;margin:0 0 24px;font-size:20px;">💾 النسخ الاحتياطي</h2>
+
+            <!-- تصدير -->
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(52,152,219,0.3);border-radius:16px;padding:20px;margin-bottom:16px;">
+                <h3 style="color:#3498db;margin:0 0 12px;font-size:15px;"><i class="fas fa-download"></i> تصدير البيانات</h3>
+                <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:14px;">تنزيل جميع بيانات الموقع كملف JSON</p>
+                <button onclick="exportBackup()" style="width:100%;background:linear-gradient(135deg,#3498db,#2980b9);border:none;border-radius:12px;padding:12px;color:#fff;font-family:'Cairo';font-size:14px;font-weight:700;cursor:pointer;">
+                    <i class="fas fa-download"></i> تصدير الآن
+                </button>
+            </div>
+
+            <!-- استيراد -->
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(46,204,113,0.3);border-radius:16px;padding:20px;margin-bottom:16px;">
+                <h3 style="color:#2ecc71;margin:0 0 12px;font-size:15px;"><i class="fas fa-upload"></i> استيراد البيانات</h3>
+                <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:14px;">⚠️ سيتم استبدال جميع البيانات الحالية</p>
+                <input type="file" id="importFile" accept=".json" onchange="importBackup(this)" style="display:none;">
+                <button onclick="document.getElementById('importFile').click()" style="width:100%;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:12px;padding:12px;color:#fff;font-family:'Cairo';font-size:14px;font-weight:700;cursor:pointer;">
+                    <i class="fas fa-upload"></i> استيراد ملف
+                </button>
+            </div>
+
+            <!-- تقرير شهري -->
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.3);border-radius:16px;padding:20px;margin-bottom:16px;">
+                <h3 style="color:#d4af37;margin:0 0 12px;font-size:15px;"><i class="fas fa-chart-bar"></i> التقرير الشهري</h3>
+                <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:14px;">ملخص الشهر الحالي</p>
+                <div id="monthlyReportBox" style="background:rgba(0,0,0,0.2);border-radius:12px;padding:14px;font-size:13px;"></div>
+            </div>
+
+            <span class="back-link" onclick="showView('dashboardView')">← العودة للرئيسي</span>
+        </div>
     </div>
 
     <!-- قائمة الحسابات -->
@@ -536,6 +586,14 @@
                     <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
                         <div id="cgTotalProfit" style="font-size:16px;font-weight:700">0</div>
                         <button onclick="editCumulativeProfit()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.35);font-size:13px;padding:2px;" title="تعديل صافي الربح"><i class="fas fa-pen"></i></button>
+                    </div>
+                </div>
+                <div style="width:1px;height:36px;background:rgba(255,255,255,0.1);"></div>
+                <div style="text-align:center; flex:1;">
+                    <div style="color:rgba(255,255,255,0.45);font-size:11px;margin-bottom:3px">إجمالي الديون</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                        <div id="cgTotalDebt" style="font-size:16px;font-weight:700;color:#e74c3c;">0</div>
+                        <button onclick="editTotalDebt()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.35);font-size:13px;padding:2px;" title="تعديل إجمالي الديون"><i class="fas fa-pen"></i></button>
                     </div>
                 </div>
             </div>
@@ -647,6 +705,12 @@
                 </h4>
                 <!-- بحث -->
                 <input type="text" class="search-box" id="subSearchInput" placeholder="🔍 بحث عن مشترك..." oninput="filterSubTable(this.value)">
+                <!-- أزرار الفلترة -->
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="filterButtons">
+                    <button onclick="setSubFilter('all')" id="filter-all" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.2);color:#d4af37;font-family:'Cairo';font-size:12px;cursor:pointer;font-weight:700;">الكل</button>
+                    <button onclick="setSubFilter('paid')" id="filter-paid" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(46,204,113,0.4);background:transparent;color:rgba(46,204,113,0.7);font-family:'Cairo';font-size:12px;cursor:pointer;">دافع ✅</button>
+                    <button onclick="setSubFilter('unpaid')" id="filter-unpaid" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(231,76,60,0.4);background:transparent;color:rgba(231,76,60,0.7);font-family:'Cairo';font-size:12px;cursor:pointer;">غير دافع ❌</button>
+                </div>
                 <div class="sub-table-wrap">
                     <table class="sub-table">
                         <thead>
@@ -970,25 +1034,24 @@
         <div class="modal" style="border-color: rgba(52,152,219,0.4);">
             <h3 id="appModalTitle" style="color:#3498db;">إضافة تطبيق جديد</h3>
             <div class="modal-field">
-                <label>Emoji التطبيق</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;" id="emojiPicker">
-                    <span class="emoji-opt" onclick="selectEmoji('📱')">📱</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🎮')">🎮</span>
-                    <span class="emoji-opt" onclick="selectEmoji('📚')">📚</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🎵')">🎵</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🎬')">🎬</span>
-                    <span class="emoji-opt" onclick="selectEmoji('💪')">💪</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🧠')">🧠</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🌐')">🌐</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🔒')">🔒</span>
-                    <span class="emoji-opt" onclick="selectEmoji('💊')">💊</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🛒')">🛒</span>
-                    <span class="emoji-opt" onclick="selectEmoji('✈️')">✈️</span>
-                    <span class="emoji-opt" onclick="selectEmoji('🤖')">🤖</span>
-                    <span class="emoji-opt" onclick="selectEmoji('⚙️')">⚙️</span>
-                    <span class="emoji-opt" onclick="selectEmoji('📊')">📊</span>
+                <label>صورة التطبيق</label>
+                <!-- معاينة الصورة -->
+                <div id="appImgPreview" onclick="document.getElementById('appImgFile').click()" style="width:80px;height:80px;margin:10px auto;border-radius:16px;border:2px dashed rgba(52,152,219,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(52,152,219,0.05);">
+                    <span style="color:rgba(255,255,255,0.3);font-size:28px;">📱</span>
                 </div>
-                <input id="amEmoji" type="text" placeholder="أو اكتب Emoji يدوياً" style="margin-top:8px; text-align:center; font-size:20px;" maxlength="4">
+                <input type="file" id="appImgFile" accept="image/*" style="display:none;" onchange="loadAppImage(this)">
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                    <button onclick="document.getElementById('appImgFile').click()" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(52,152,219,0.4);background:rgba(52,152,219,0.1);color:#3498db;font-family:'Cairo';font-size:12px;cursor:pointer;">
+                        <i class="fas fa-upload"></i> رفع صورة
+                    </button>
+                    <button onclick="pasteAppImage()" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.1);color:#d4af37;font-family:'Cairo';font-size:12px;cursor:pointer;">
+                        <i class="fas fa-paste"></i> لصق صورة
+                    </button>
+                    <button onclick="clearAppImage()" style="padding:8px 12px;border-radius:10px;border:1px solid rgba(231,76,60,0.4);background:rgba(231,76,60,0.1);color:#e74c3c;font-family:'Cairo';font-size:12px;cursor:pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <input id="amEmoji" type="hidden" value="">
             </div>
             <div class="modal-field"><label>اسم التطبيق</label><input id="amName" type="text" placeholder="مثال: Netflix"></div>
             <div class="modal-field"><label>الإيميل</label><input id="amEmail" type="email" placeholder="user@app.com"></div>
@@ -1037,12 +1100,24 @@
                 </div>
             </div>
 
-            <!-- رسم بياني للأرباح -->
+            <!-- تخصيص اسم الموقع -->
             <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:20px; margin-bottom:20px;">
                 <h3 style="color:var(--primary-gold); margin:0 0 16px; font-size:16px; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-chart-line"></i> رسم بياني للأرباح
+                    <i class="fas fa-pen"></i> اسم الموقع
                 </h3>
-                <canvas id="profitChart" height="200"></canvas>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span id="siteNameDisplay" style="color:var(--text-color);font-size:14px;"></span>
+                    <button onclick="editSiteName()" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:6px 14px;color:#d4af37;font-family:'Cairo';font-size:12px;cursor:pointer;">تعديل ✏️</button>
+                </div>
+            </div>
+
+            <!-- تثبيت كتطبيق PWA -->
+            <div id="pwaInstallBtn" style="display:none;background:rgba(52,152,219,0.06); border:1px solid rgba(52,152,219,0.3); border-radius:20px; padding:20px; margin-bottom:20px;">
+                <h3 style="color:#3498db; margin:0 0 12px; font-size:16px;"><i class="fas fa-mobile-alt"></i> تثبيت كتطبيق</h3>
+                <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:14px;">ثبّت الموقع على شاشة هاتفك للوصول السريع</p>
+                <button onclick="installPWA()" style="width:100%;background:linear-gradient(135deg,#3498db,#2980b9);border:none;border-radius:12px;padding:12px;color:#fff;font-family:'Cairo';font-size:14px;font-weight:700;cursor:pointer;">
+                    <i class="fas fa-download"></i> تثبيت الآن
+                </button>
             </div>
 
             <!-- تعديل بيانات الدخول -->
@@ -1112,6 +1187,23 @@
     </div>
 
     <!-- نافذة إضافة/تعديل مشترك -->
+    <!-- نافذة نقل مشترك -->
+    <div id="transferModalOverlay" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 style="color:var(--primary-gold);margin-bottom:16px;">↔️ نقل مشترك</h3>
+            <p id="transferSubName" style="color:rgba(255,255,255,0.7);font-size:13px;margin-bottom:16px;text-align:center;"></p>
+            <div class="modal-field">
+                <label>اختر الحساب المستهدف</label>
+                <select id="transferTarget" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(212,175,55,0.3);background:#0d3d36;color:#fff;font-family:'Cairo';font-size:13px;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;">
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeTransferModal()">إلغاء</button>
+                <button class="btn-save" onclick="confirmTransfer()">نقل ↔️</button>
+            </div>
+        </div>
+    </div>
+
     <div id="subModalOverlay" class="modal-overlay hidden">
         <div class="modal">
             <h3 id="subModalTitle">مشترك جديد</h3>
@@ -1407,6 +1499,50 @@
         }
 
         // تعديل صافي الربح التراكمي
+        // تعديل إجمالي الديون
+        function editTotalDebt() {
+            // احتساب الديون الحالية
+            let currentDebt = 0;
+            accounts.forEach(acc => {
+                (acc.subscribers || []).forEach(s => {
+                    if (!s.paid) currentDebt += s.price !== undefined ? s.price : PRICE_PER_SUB;
+                });
+            });
+            const val = prompt('أدخل قيمة إجمالي الديون الجديدة (د.ع):', currentDebt);
+            if (val === null) return;
+            const num = parseFloat(val.replace(/,/g, ''));
+            if (isNaN(num) || num < 0) { showToast('❌ رقم غير صحيح!'); return; }
+
+            // توزيع الفرق على المشتركين الغير دافعين
+            const diff = num - currentDebt;
+            const unpaidSubs = [];
+            accounts.forEach((acc, ai) => {
+                (acc.subscribers || []).forEach((s, si) => {
+                    if (!s.paid) unpaidSubs.push({ acc, s });
+                });
+            });
+
+            if (unpaidSubs.length > 0 && diff !== 0) {
+                const perSub = diff / unpaidSubs.length;
+                unpaidSubs.forEach(({ s }) => {
+                    s.price = Math.max(0, (s.price !== undefined ? s.price : PRICE_PER_SUB) + perSub);
+                });
+                syncDataToFirebase();
+            }
+
+            const el = document.getElementById('cgTotalDebt');
+            if (el) {
+                el.textContent = num > 0 ? '-' + num.toLocaleString() + ' د.ع' : '0';
+                el.style.color = num > 0 ? '#e74c3c' : '#2ecc71';
+            }
+            showToast('✅ تم تحديث إجمالي الديون');
+        }
+
+        // تعديل إجمالي المشتركين (للعرض فقط)
+        function editTotalSubs() {
+            showToast('عدد المشتركين يُحسب تلقائياً من البيانات');
+        }
+
         function editCumulativeProfit() {
             // احتساب grandNet الحالي
             let grandNet = 0;
@@ -1509,6 +1645,242 @@
         }
 
         // ========== البحث العام عن مشترك ==========
+        // ========== نقل مشترك ==========
+        let transferSubIndex = -1;
+
+        function openTransferModal(idx) {
+            transferSubIndex = idx;
+            const sub = accounts[currentDetailIndex].subscribers[idx];
+            document.getElementById('transferSubName').textContent = `نقل: ${sub.name}`;
+
+            const select = document.getElementById('transferTarget');
+            select.innerHTML = '';
+            accounts.forEach((acc, i) => {
+                if (i !== currentDetailIndex) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = acc.name + ' (' + (acc.subscribers||[]).length + ' مشترك)';
+                    select.appendChild(opt);
+                }
+            });
+
+            if (select.options.length === 0) {
+                showToast('لا يوجد حسابات أخرى للنقل!');
+                return;
+            }
+            document.getElementById('transferModalOverlay').classList.remove('hidden');
+        }
+
+        function closeTransferModal() {
+            document.getElementById('transferModalOverlay').classList.add('hidden');
+            transferSubIndex = -1;
+        }
+
+        function confirmTransfer() {
+            if (transferSubIndex === -1) return;
+            const targetIdx = parseInt(document.getElementById('transferTarget').value);
+            const sub = accounts[currentDetailIndex].subscribers[transferSubIndex];
+
+            if (!accounts[targetIdx].subscribers) accounts[targetIdx].subscribers = [];
+            accounts[targetIdx].subscribers.push({ ...sub });
+            accounts[currentDetailIndex].subscribers.splice(transferSubIndex, 1);
+
+            syncDataToFirebase();
+            closeTransferModal();
+            renderSubTable();
+            showToast(`✅ تم نقل "${sub.name}" إلى ${accounts[targetIdx].name}`);
+        }
+
+        // ========== فلترة المشتركين ==========
+        let currentFilter = 'all';
+        function setSubFilter(filter) {
+            currentFilter = filter;
+            ['all','paid','unpaid','newest','oldest'].forEach(f => {
+                const btn = document.getElementById('filter-' + f);
+                if (!btn) return;
+                btn.style.opacity = f === filter ? '1' : '0.6';
+                btn.style.fontWeight = f === filter ? '700' : '400';
+            });
+            renderSubTable();
+        }
+
+        function filterSubTable(query) {
+            const rows = document.querySelectorAll('#subTableBody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        // ========== الحسابات المنتهية ==========
+        function renderExpiredAccounts() {
+            const list = document.getElementById('expiredAccountsList');
+            list.innerHTML = '';
+            const expired = accounts.filter(acc => acc.end && new Date(acc.end) < new Date());
+            if (expired.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;padding:20px;grid-column:1/-1;">لا توجد حسابات منتهية ✅</p>';
+                return;
+            }
+            expired.forEach(acc => {
+                const index = accounts.indexOf(acc);
+                const subCount = (acc.subscribers || []).length;
+                const endDate = new Date(acc.end).toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long' });
+                const card = document.createElement('div');
+                card.style.cssText = 'background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.3);border-radius:16px;padding:14px 12px;cursor:pointer;text-align:center;';
+                card.innerHTML = `
+                    <div style="font-size:28px;margin:8px 0 6px">🗂️</div>
+                    <div style="font-weight:700;font-size:14px;color:#e74c3c;margin-bottom:6px;">${acc.name}</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:8px;">انتهى ${endDate}</div>
+                    <div style="display:inline-block;background:rgba(231,76,60,0.15);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:#e74c3c;">${subCount} مشترك</div>`;
+                card.addEventListener('click', () => openDetails(index));
+                list.appendChild(card);
+            });
+        }
+
+        // ========== نسخ احتياطي ==========
+        function exportBackup() {
+            const data = { accounts, appAccounts, trash, users, admins, cumulativeProfit, lastMonthCheck, exportDate: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'maryooma_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ تم تصدير النسخة الاحتياطية');
+        }
+
+        function importBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    if (!confirm('⚠️ سيتم استبدال جميع البيانات. هل أنت متأكد؟')) return;
+                    const data = JSON.parse(e.target.result);
+                    accounts = data.accounts || [];
+                    appAccounts = data.appAccounts || [];
+                    trash = data.trash || [];
+                    users = data.users || users;
+                    admins = data.admins || [];
+                    cumulativeProfit = data.cumulativeProfit || 0;
+                    lastMonthCheck = data.lastMonthCheck || '';
+                    syncDataToFirebase();
+                    showToast('✅ تم استيراد البيانات بنجاح');
+                    showView('dashboardView');
+                } catch(err) { showToast('❌ ملف غير صحيح!'); }
+            };
+            reader.readAsText(file);
+        }
+
+        // ========== التقرير الشهري ==========
+        function renderMonthlyReport() {
+            const box = document.getElementById('monthlyReportBox');
+            if (!box) return;
+            const monthName = new Date().toLocaleDateString('ar-IQ', { month: 'long', year: 'numeric' });
+            let totalSubs = 0, paidSubs = 0, unpaidSubs = 0, totalProfit = 0;
+            accounts.forEach(acc => {
+                const subs = acc.subscribers || [];
+                totalSubs += subs.length;
+                paidSubs += subs.filter(s => s.paid).length;
+                unpaidSubs += subs.filter(s => !s.paid).length;
+                const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
+                totalProfit += collected - parseFloat(acc.cost || 0);
+            });
+            const isProfit = totalProfit >= 0;
+            box.innerHTML = `
+                <div style="color:#d4af37;font-weight:700;margin-bottom:10px;">📅 ${monthName}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;text-align:center;">
+                        <div style="color:rgba(255,255,255,0.4);font-size:10px;margin-bottom:4px">إجمالي المشتركين</div>
+                        <div style="color:#fff;font-size:18px;font-weight:700">${totalSubs}</div>
+                    </div>
+                    <div style="background:rgba(46,204,113,0.1);border-radius:10px;padding:10px;text-align:center;">
+                        <div style="color:rgba(255,255,255,0.4);font-size:10px;margin-bottom:4px">دافعون</div>
+                        <div style="color:#2ecc71;font-size:18px;font-weight:700">${paidSubs}</div>
+                    </div>
+                    <div style="background:rgba(231,76,60,0.1);border-radius:10px;padding:10px;text-align:center;">
+                        <div style="color:rgba(255,255,255,0.4);font-size:10px;margin-bottom:4px">غير دافعين</div>
+                        <div style="color:#e74c3c;font-size:18px;font-weight:700">${unpaidSubs}</div>
+                    </div>
+                    <div style="background:${isProfit?'rgba(46,204,113,0.1)':'rgba(231,76,60,0.1)'};border-radius:10px;padding:10px;text-align:center;">
+                        <div style="color:rgba(255,255,255,0.4);font-size:10px;margin-bottom:4px">صافي الربح</div>
+                        <div style="color:${isProfit?'#2ecc71':'#e74c3c'};font-size:14px;font-weight:700">${isProfit?'+':'-'}${Math.abs(totalProfit).toLocaleString()} د.ع</div>
+                    </div>
+                </div>`;
+        }
+
+        // ===== سحب وإفلات المشتركين =====
+        let subDragSrcIdx = null;
+        function initSubDragDrop() {
+            const rows = document.querySelectorAll('#subTableBody tr[draggable]');
+            rows.forEach(row => {
+                row.addEventListener('dragstart', () => {
+                    subDragSrcIdx = parseInt(row.getAttribute('data-sub-idx'));
+                    setTimeout(() => row.style.opacity = '0.4', 0);
+                });
+                row.addEventListener('dragend', () => row.style.opacity = '1');
+                row.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    row.style.background = 'rgba(212,175,55,0.1)';
+                });
+                row.addEventListener('dragleave', () => row.style.background = '');
+                row.addEventListener('drop', e => {
+                    e.preventDefault();
+                    row.style.background = '';
+                    const dropIdx = parseInt(row.getAttribute('data-sub-idx'));
+                    if (subDragSrcIdx !== null && subDragSrcIdx !== dropIdx) {
+                        const subs = accounts[currentDetailIndex].subscribers;
+                        const moved = subs.splice(subDragSrcIdx, 1)[0];
+                        subs.splice(dropIdx, 0, moved);
+                        syncDataToFirebase();
+                        renderSubTable();
+                    }
+                });
+            });
+        }
+
+        // ===== عداد الأيام المتبقية =====
+        function getDaysRemaining(endDate) {
+            if (!endDate) return null;
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const end = new Date(endDate);
+            end.setHours(0,0,0,0);
+            return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+        }
+
+        // ===== PWA تثبيت الموقع =====
+        let pwaInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            pwaInstallPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.display = 'block';
+        });
+
+        function installPWA() {
+            if (!pwaInstallPrompt) { showToast('افتح الموقع في المتصفح لتثبيته'); return; }
+            pwaInstallPrompt.prompt();
+            pwaInstallPrompt.userChoice.then(() => { pwaInstallPrompt = null; });
+        }
+
+        // ===== تخصيص اسم الموقع =====
+        function editSiteName() {
+            const current = localStorage.getItem('siteName') || 'Maryooma Store';
+            const newName = prompt('أدخل اسم الموقع الجديد:', current);
+            if (!newName || !newName.trim()) return;
+            localStorage.setItem('siteName', newName.trim());
+            applySiteName();
+            showToast('✅ تم تغيير اسم الموقع');
+        }
+
+        function applySiteName() {
+            const name = localStorage.getItem('siteName') || 'Maryooma Store';
+            document.title = 'إدارة الحسابات - ' + name;
+            const el = document.querySelector('.site-name-display');
+            if (el) el.textContent = name;
+        }
+
         function globalSearchSubs(query) {
             const results = document.getElementById('globalSearchResults');
             if (!query.trim()) { results.style.display = 'none'; return; }
@@ -1720,6 +2092,7 @@
                 if (toggle) toggle.checked = true;
                 toggleLightMode(true);
             }
+            applySiteName();
             setInterval(checkNotifications, 30 * 60 * 1000);
         });
 
@@ -1734,15 +2107,33 @@
             if (viewId === 'trashView') renderTrash();
             if (viewId === 'appAccountsView') { updateAppStats(); }
             if (viewId === 'appCategoryView') renderAppAccounts();
-            if (viewId === 'settingsView') { renderSettings(); setTimeout(renderProfitChart, 100); }
+            if (viewId === 'settingsView') renderSettings();
+            if (viewId === 'expiredAccountsView') renderExpiredAccounts();
+            if (viewId === 'backupView') setTimeout(renderMonthlyReport, 100);
             viewHistory.push(viewId);
 
-            // إظهار زر الرجوع
+            // إضافة للتاريخ حتى يعمل زر الرجوع في الهاتف
+            try { history.pushState({ view: viewId }, '', '#' + viewId); } catch(e) {}
+
             const backBtn = document.getElementById('backBtnWrapper');
             if (backBtn) {
                 backBtn.style.display = (viewId !== 'loginView' && viewId !== 'dashboardView' && currentLoggedUser) ? 'block' : 'none';
             }
         }
+
+        // زر الرجوع في الهاتف والأجهزة
+        window.addEventListener('popstate', function(e) {
+            if (!currentLoggedUser) return;
+            if (viewHistory.length > 1) {
+                viewHistory.pop();
+                const prevView = viewHistory[viewHistory.length - 1];
+                viewHistory.pop();
+                showView(prevView);
+            }
+        });
+
+        // تهيئة التاريخ
+        try { history.replaceState({ view: 'loginView' }, '', location.href); } catch(e) {}
 
         function goBack() {
             if (!currentLoggedUser) return;
@@ -1769,12 +2160,14 @@
             // احتساب أرباح جميع الحسابات (نشطة + منتهية)
             let grandNet = 0;
             let grandSubs = 0;
+            let grandDebt = 0;
             accounts.forEach(acc => {
                 const subs = acc.subscribers || [];
                 grandSubs += subs.length;
                 const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
                 const cost = parseFloat(acc.cost || 0);
                 grandNet += collected - cost;
+                grandDebt += subs.filter(s => !s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
             });
             // إضافة الأرباح التراكمية من الحسابات المنتهية سابقاً
             const totalProfit = grandNet + cumulativeProfit;
@@ -1796,6 +2189,11 @@
                 const isProfit = totalProfit >= 0;
                 cgP.textContent = (isProfit ? '+' : '-') + Math.abs(totalProfit).toLocaleString() + ' د.ع';
                 cgP.style.color = isProfit ? '#2ecc71' : '#e74c3c';
+            }
+            const cgD = document.getElementById('cgTotalDebt');
+            if (cgD) {
+                cgD.textContent = grandDebt > 0 ? '-' + grandDebt.toLocaleString() + ' د.ع' : '0';
+                cgD.style.color = grandDebt > 0 ? '#e74c3c' : '#2ecc71';
             }
 
             if (accounts.length === 0) {
@@ -1850,12 +2248,16 @@
                         </span>
                     </div>
                     <!-- أيقونة واسم -->
-                    <div style="font-size:28px;margin:18px 0 6px">🗂️</div>
-                    <div style="font-weight:700;font-size:14px;color:var(--primary-gold);margin-bottom:6px;">${acc.name}</div>
-                    <!-- تاريخ الانتهاء -->
-                    ${endLabel ? `<div style="font-size:11px;color:${isExpired ? '#e74c3c' : 'rgba(255,255,255,0.45)'};margin-bottom:8px;">
-                        <i class="fas fa-calendar-alt" style="margin-left:3px;font-size:10px;"></i>ينتهي ${endLabel}
-                    </div>` : '<div style="height:19px;margin-bottom:8px;"></div>'}
+                    <div style="font-size:22px;font-weight:800;color:var(--primary-gold);margin:22px 0 8px;letter-spacing:1px;">${acc.name}</div>
+                    <!-- تاريخ الانتهاء وعداد الأيام -->
+                    ${endLabel ? (() => {
+                        const days = getDaysRemaining(acc.end);
+                        const clr = days !== null && days <= 0 ? '#e74c3c' : days !== null && days <= 3 ? '#f39c12' : 'rgba(255,255,255,0.45)';
+                        const txt = days === null ? '' : days <= 0 ? ' ⚠️' : days <= 3 ? ' (' + days + ' أيام)' : '';
+                        return `<div style="font-size:11px;color:${clr};margin-bottom:8px;">
+                            <i class="fas fa-calendar-alt" style="margin-left:3px;font-size:10px;"></i>ينتهي ${endLabel}${txt}
+                        </div>`;
+                    })() : '<div style="height:19px;margin-bottom:8px;"></div>'}
                     <!-- عدد المشتركين -->
                     <div style="display:inline-block;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.35);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--primary-gold);">
                         ${subCount} مشترك
@@ -2455,39 +2857,52 @@
         // رسم الجدول والملخص
         function renderSubTable() {
             const acc = accounts[currentDetailIndex];
-            const subs = acc.subscribers || [];
+            let subs = acc.subscribers || [];
             const tbody = document.getElementById('subTableBody');
             tbody.innerHTML = '';
             const isExpired = acc.end && new Date(acc.end) < new Date();
 
-            if (subs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="color:rgba(255,255,255,0.3); padding:20px;">لا يوجد مشتركون بعد</td></tr>';
+            // تطبيق الفلتر
+            let filtered = [...subs];
+            if (currentFilter === 'paid') filtered = subs.filter(s => s.paid);
+            else if (currentFilter === 'unpaid') filtered = subs.filter(s => !s.paid);
+            else if (currentFilter === 'newest') filtered = [...subs].reverse();
+            else if (currentFilter === 'oldest') filtered = [...subs];
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="color:rgba(255,255,255,0.3); padding:20px;">لا يوجد مشتركون</td></tr>';
             } else {
-                subs.forEach((s, i) => {
+                filtered.forEach((s, i) => {
+                    const realIdx = subs.indexOf(s);
                     const handle = tgHandle(s.tg);
                     const tgCell = handle
                         ? `<a class="tg-link" href="https://t.me/${handle}" target="_blank"><i class="fab fa-telegram"></i></a>`
                         : `<span style="color:rgba(255,255,255,0.2)">—</span>`;
                     const subPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
                     tbody.innerHTML += `
-                        <tr>
-                            <td style="color:var(--primary-gold); font-weight:700; white-space:nowrap;">${i + 1}</td>
+                        <tr draggable="true" data-sub-idx="${realIdx}" style="cursor:grab;">
+                            <td style="color:var(--primary-gold); font-weight:700; white-space:nowrap;">
+                                <span style="color:rgba(255,255,255,0.2);margin-left:4px;font-size:14px;">⠿</span>${i + 1}
+                            </td>
                             <td style="font-weight:600; color:#fff">${s.name}</td>
                             <td>${tgCell}</td>
                             <td style="color:rgba(255,255,255,0.6); font-size:12px">${s.date || '—'}</td>
-                            <td><button class="status-dot ${s.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${i})" title="${s.paid ? 'دافع' : 'غير دافع'}"></button></td>
+                            <td><button class="status-dot ${s.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${realIdx})" title="${s.paid ? 'دافع' : 'غير دافع'}"></button></td>
                             <td><span class="note-text" title="${s.note}">${s.note || '—'}</span></td>
                             <td><span class="price-tag">${subPrice.toLocaleString()}</span></td>
                             <td>
-                                <button class="sub-edit-btn" onclick="openEditSubModal(${i})"><i class="fas fa-edit"></i></button>
-                                <button class="sub-del-btn" onclick="deleteSub(${i})"><i class="fas fa-trash"></i></button>
-                                <button onclick="copySubData(${i})" style="background:rgba(255,255,255,0.07);border:none;border-radius:6px;padding:4px 6px;color:rgba(255,255,255,0.5);cursor:pointer;font-size:11px;" title="نسخ البيانات"><i class="fas fa-copy"></i></button>
+                                <button class="sub-edit-btn" onclick="openEditSubModal(${realIdx})"><i class="fas fa-edit"></i></button>
+                                <button class="sub-del-btn" onclick="deleteSub(${realIdx})"><i class="fas fa-trash"></i></button>
+                                <button onclick="copySubData(${realIdx})" style="background:rgba(255,255,255,0.07);border:none;border-radius:6px;padding:4px 6px;color:rgba(255,255,255,0.5);cursor:pointer;font-size:11px;" title="نسخ البيانات"><i class="fas fa-copy"></i></button>
+                                <button onclick="openTransferModal(${realIdx})" style="background:rgba(212,175,55,0.1);border:none;border-radius:6px;padding:4px 6px;color:#d4af37;cursor:pointer;font-size:11px;" title="نقل لحساب آخر"><i class="fas fa-exchange-alt"></i></button>
                             </td>
                         </tr>`;
                 });
             }
             renderSummary(subs, acc, isExpired);
             if (document.getElementById('storeTotalValue')) renderAccounts();
+            // تفعيل سحب وإفلات المشتركين
+            initSubDragDrop();
         }
 
         // الملخص المالي
@@ -2647,8 +3062,12 @@
                             ${isExpired ? 'منتهي' : 'نشط'}
                         </span>
                     </div>
-                    <!-- إيموجي واسم -->
-                    <div style="font-size:28px;margin:18px 0 6px">${acc.emoji || '📱'}</div>
+                    <!-- صورة أو أيقونة -->
+                    <div style="width:60px;height:60px;margin:14px auto 8px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(52,152,219,0.1);">
+                        ${acc.emoji && acc.emoji.startsWith('data:')
+                            ? `<img src="${acc.emoji}" style="width:100%;height:100%;object-fit:cover;">`
+                            : `<span style="font-size:32px;">${acc.emoji || '📱'}</span>`}
+                    </div>
                     <div style="font-weight:700;font-size:14px;color:#3498db;margin-bottom:8px;">${acc.name}</div>
                     <!-- تاريخ الانتهاء -->
                     ${endLabel ? `<div style="font-size:11px;color:${isExpired?'#e74c3c':'rgba(255,255,255,0.5)'};margin-bottom:8px;"><i class="fas fa-calendar-alt" style="margin-left:3px;font-size:10px;"></i>${endLabel}</div>` : ''}
@@ -2831,7 +3250,7 @@
             document.getElementById('amName').value = '';
             document.getElementById('amEmail').value = '';
             document.getElementById('amPassword').value = '';
-            document.querySelectorAll('.emoji-opt').forEach(el => el.classList.remove('selected'));
+            clearAppImage();
             document.getElementById('appModalOverlay').classList.remove('hidden');
         }
 
@@ -2843,10 +3262,60 @@
             document.getElementById('amName').value = acc.name;
             document.getElementById('amEmail').value = acc.email;
             document.getElementById('amPassword').value = acc.password;
-            document.querySelectorAll('.emoji-opt').forEach(el => {
-                el.classList.toggle('selected', el.textContent === acc.emoji);
-            });
+
+            // عرض الصورة الحالية
+            const preview = document.getElementById('appImgPreview');
+            if (acc.emoji && acc.emoji.startsWith('data:')) {
+                preview.innerHTML = `<img src="${acc.emoji}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+            } else {
+                preview.innerHTML = `<span style="color:rgba(255,255,255,0.3);font-size:28px;">${acc.emoji || '📱'}</span>`;
+            }
             document.getElementById('appModalOverlay').classList.remove('hidden');
+        }
+
+        // ===== صورة التطبيق =====
+        function loadAppImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                document.getElementById('amEmoji').value = base64;
+                const preview = document.getElementById('appImgPreview');
+                preview.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function pasteAppImage() {
+            try {
+                const items = await navigator.clipboard.read();
+                for (const item of items) {
+                    for (const type of item.types) {
+                        if (type.startsWith('image/')) {
+                            const blob = await item.getType(type);
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const base64 = e.target.result;
+                                document.getElementById('amEmoji').value = base64;
+                                const preview = document.getElementById('appImgPreview');
+                                preview.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+                            };
+                            reader.readAsDataURL(blob);
+                            return;
+                        }
+                    }
+                }
+                showToast('لا توجد صورة في الحافظة!');
+            } catch(e) {
+                showToast('يرجى نسخ صورة أولاً ثم اللصق');
+            }
+        }
+
+        function clearAppImage() {
+            document.getElementById('amEmoji').value = '';
+            document.getElementById('appImgFile').value = '';
+            document.getElementById('appImgPreview').innerHTML = '<span style="color:rgba(255,255,255,0.3);font-size:28px;">📱</span>';
         }
 
         function closeAppModal() { document.getElementById('appModalOverlay').classList.add('hidden'); }
@@ -3097,6 +3566,10 @@
 
         function renderSettings() {
             const isAdmin = currentLoggedUser && admins.some(a => a.username === currentLoggedUser.username);
+
+            // عرض اسم الموقع
+            const snd = document.getElementById('siteNameDisplay');
+            if (snd) snd.textContent = localStorage.getItem('siteName') || 'Maryooma Store';
 
             // عرض المستخدم الرئيسي
             const ul = document.getElementById('currentUsersList');
