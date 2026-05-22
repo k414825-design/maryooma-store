@@ -1411,7 +1411,37 @@
 
         // الاستماع المباشر للتغييرات في Firebase
         if (db) {
-            // تحميل البيانات مرة واحدة عند البداية
+            // ① تحميل فوري من الكاش المحلي
+            try {
+                const cached = localStorage.getItem('maryoomaCache');
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    accounts = data.accounts || [];
+                    appAccounts = data.appAccounts || [];
+                    trash = data.trash || [];
+                    users = data.users || [{ name: 'المدير', username: 'karar', password: '9129', isMain: true }];
+                    admins = data.admins || [];
+                    cumulativeProfit = data.cumulativeProfit || 0;
+                    lastMonthCheck = data.lastMonthCheck || '';
+                    comingSoon = data.comingSoon || [];
+                    isDataLoaded = true;
+
+                    // تسجيل دخول تلقائي من الكاش
+                    if (savedCredentials && !currentLoggedUser) {
+                        const allUsers = [...users, ...admins];
+                        const match = allUsers.find(u => u.username === savedCredentials.username && u.password === savedCredentials.password);
+                        if (match) {
+                            currentLoggedUser = match;
+                            showView('dashboardView');
+                            document.getElementById('bellWrapper').style.display = 'block';
+                            checkNotifications();
+                            registerFCMToken();
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // ② تحديث من Firebase في الخلفية
             db.ref('storeData').once('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -1495,13 +1525,10 @@
 
         // دالة المزامنة مع Firebase
         function syncDataToFirebase() {
-            // حفظ في LocalStorage كنسخة احتياطية تعمل على نفس الجهاز
+            // حفظ في الكاش المحلي فوراً
             try {
-                localStorage.setItem('maryoomaAccounts', JSON.stringify(accounts));
-                localStorage.setItem('maryoomaAppAccounts', JSON.stringify(appAccounts));
-                localStorage.setItem('maryoomaTrash', JSON.stringify(trash));
-                localStorage.setItem('maryoomaUsers', JSON.stringify(users));
-                localStorage.setItem('maryoomaAdmins', JSON.stringify(admins));
+                const cacheData = { accounts, appAccounts, trash, users, admins, cumulativeProfit, lastMonthCheck, comingSoon };
+                localStorage.setItem('maryoomaCache', JSON.stringify(cacheData));
             } catch(e) {}
 
             if (!isDataLoaded || !db) return;
