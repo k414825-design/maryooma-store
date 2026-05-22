@@ -805,6 +805,19 @@
                     </div>
                 </div>
 
+                <!-- قسم قريباً -->
+                <div style="margin-top:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:20px;">🔜</span>
+                            <span style="font-weight:700;font-size:16px;color:#f39c12;">قريباً</span>
+                            <span id="countComingSoon" style="background:rgba(243,156,18,0.15);color:#f39c12;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid rgba(243,156,18,0.3);">0</span>
+                        </div>
+                        <button onclick="openAddComingSoonModal()" style="background:rgba(243,156,18,0.15);border:1px solid rgba(243,156,18,0.3);border-radius:10px;padding:6px 14px;color:#f39c12;font-family:'Cairo';font-size:12px;font-weight:700;cursor:pointer;">+ إضافة</button>
+                    </div>
+                    <div id="comingSoonList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;"></div>
+                </div>
+
             </div>
             <span class="back-link" onclick="showView('dashboardView')">← العودة للرئيسي</span>
         </div>
@@ -1204,6 +1217,38 @@
         </div>
     </div>
 
+    <!-- نافذة إضافة/تعديل تطبيق قريباً -->
+    <div id="comingSoonModalOverlay" class="modal-overlay hidden">
+        <div class="modal" style="border-color:rgba(243,156,18,0.4);">
+            <h3 id="comingSoonModalTitle" style="color:#f39c12;">🔜 إضافة تطبيق قريباً</h3>
+            <div class="modal-field">
+                <label>صورة التطبيق</label>
+                <div id="csImgPreview" onclick="document.getElementById('csImgFile').click()" style="width:80px;height:80px;margin:10px auto;border-radius:16px;border:2px dashed rgba(243,156,18,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(243,156,18,0.05);">
+                    <span style="color:rgba(255,255,255,0.3);font-size:28px;">📱</span>
+                </div>
+                <input type="file" id="csImgFile" accept="image/*" style="display:none;" onchange="loadCSImage(this)">
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                    <button onclick="document.getElementById('csImgFile').click()" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(243,156,18,0.4);background:rgba(243,156,18,0.1);color:#f39c12;font-family:'Cairo';font-size:12px;cursor:pointer;"><i class="fas fa-upload"></i> رفع</button>
+                    <button onclick="pasteCSImage()" style="flex:1;padding:8px;border-radius:10px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.1);color:#d4af37;font-family:'Cairo';font-size:12px;cursor:pointer;"><i class="fas fa-paste"></i> لصق</button>
+                    <button onclick="clearCSImage()" style="padding:8px 12px;border-radius:10px;border:1px solid rgba(231,76,60,0.4);background:rgba(231,76,60,0.1);color:#e74c3c;font-family:'Cairo';font-size:12px;cursor:pointer;"><i class="fas fa-times"></i></button>
+                </div>
+                <input id="csImgData" type="hidden" value="">
+            </div>
+            <div class="modal-field">
+                <label>اسم التطبيق</label>
+                <input id="csName" type="text" placeholder="مثال: Disney+">
+            </div>
+            <div class="modal-field">
+                <label>ملاحظة (اختياري)</label>
+                <input id="csNote" type="text" placeholder="مثال: متوقع في يونيو">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeCSModal()">إلغاء</button>
+                <button class="btn-save" style="background:linear-gradient(135deg,#f39c12,#e67e22);" onclick="saveComingSoon()">حفظ</button>
+            </div>
+        </div>
+    </div>
+
     <div id="subModalOverlay" class="modal-overlay hidden">
         <div class="modal">
             <h3 id="subModalTitle">مشترك جديد</h3>
@@ -1312,6 +1357,7 @@
         let admins = [];
         let cumulativeProfit = 0;
         let lastMonthCheck = '';
+        let comingSoon = [];
 
         // محاولة استعادة البيانات المحلية كنسخة احتياطية
         try {
@@ -1397,6 +1443,7 @@
                     if (lastMonthCheck !== currentMonth) { lastMonthCheck = currentMonth; changed = true; }
                     if (changed) syncDataToFirebase();
                 }
+                comingSoon = data.comingSoon || [];
                 isDataLoaded = true;
 
                 // تسجيل دخول تلقائي إذا كانت البيانات محفوظة
@@ -1435,6 +1482,7 @@
                 admins: admins,
                 cumulativeProfit: cumulativeProfit,
                 lastMonthCheck: lastMonthCheck,
+                comingSoon: comingSoon,
                 _baseSet: true
             }).catch(e => {
                 console.error("Error saving to Firebase: ", e);
@@ -1809,6 +1857,133 @@
                 </div>`;
         }
 
+        // ===== قريباً =====
+        let csEditIndex = -1;
+
+        function renderComingSoon() {
+            const list = document.getElementById('comingSoonList');
+            const counter = document.getElementById('countComingSoon');
+            if (!list) return;
+            if (counter) counter.textContent = comingSoon.length + ' تطبيق';
+            list.innerHTML = '';
+            if (comingSoon.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;grid-column:1/-1;padding:10px;">لا توجد تطبيقات مقترحة</p>';
+                return;
+            }
+            comingSoon.forEach((app, i) => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:rgba(243,156,18,0.06);border:1px solid rgba(243,156,18,0.25);border-radius:14px;padding:12px 10px;text-align:center;position:relative;';
+                card.innerHTML = `
+                    <div style="position:absolute;top:6px;left:6px;display:flex;gap:3px;">
+                        <button onclick="editComingSoon(${i})" style="background:rgba(255,255,255,0.07);border:none;border-radius:6px;padding:3px 5px;color:rgba(255,255,255,0.5);cursor:pointer;font-size:10px;"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteComingSoon(${i})" style="background:rgba(231,76,60,0.1);border:none;border-radius:6px;padding:3px 5px;color:#e74c3c;cursor:pointer;font-size:10px;"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div style="width:50px;height:50px;margin:16px auto 8px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(243,156,18,0.1);">
+                        ${app.img && app.img.startsWith('data:')
+                            ? `<img src="${app.img}" style="width:100%;height:100%;object-fit:cover;">`
+                            : `<span style="font-size:26px;">📱</span>`}
+                    </div>
+                    <div style="font-weight:700;font-size:13px;color:#f39c12;margin-bottom:4px;">${app.name}</div>
+                    ${app.note ? `<div style="font-size:10px;color:rgba(255,255,255,0.4);">${app.note}</div>` : ''}
+                    <div style="margin-top:6px;background:rgba(243,156,18,0.15);border-radius:10px;padding:2px 8px;font-size:10px;color:#f39c12;display:inline-block;">🔜 قريباً</div>`;
+                list.appendChild(card);
+            });
+        }
+
+        function openAddComingSoonModal() {
+            csEditIndex = -1;
+            document.getElementById('comingSoonModalTitle').textContent = '🔜 إضافة تطبيق قريباً';
+            document.getElementById('csName').value = '';
+            document.getElementById('csNote').value = '';
+            document.getElementById('csImgData').value = '';
+            document.getElementById('csImgPreview').innerHTML = '<span style="color:rgba(255,255,255,0.3);font-size:28px;">📱</span>';
+            document.getElementById('comingSoonModalOverlay').classList.remove('hidden');
+        }
+
+        function editComingSoon(i) {
+            csEditIndex = i;
+            const app = comingSoon[i];
+            document.getElementById('comingSoonModalTitle').textContent = 'تعديل: ' + app.name;
+            document.getElementById('csName').value = app.name;
+            document.getElementById('csNote').value = app.note || '';
+            document.getElementById('csImgData').value = app.img || '';
+            const preview = document.getElementById('csImgPreview');
+            if (app.img && app.img.startsWith('data:')) {
+                preview.innerHTML = `<img src="${app.img}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+            } else {
+                preview.innerHTML = '<span style="color:rgba(255,255,255,0.3);font-size:28px;">📱</span>';
+            }
+            document.getElementById('comingSoonModalOverlay').classList.remove('hidden');
+        }
+
+        function deleteComingSoon(i) {
+            if (!confirm('حذف "' + comingSoon[i].name + '"؟')) return;
+            comingSoon.splice(i, 1);
+            syncDataToFirebase();
+            renderComingSoon();
+            showToast('🗑️ تم الحذف');
+        }
+
+        function saveComingSoon() {
+            const name = document.getElementById('csName').value.trim();
+            if (!name) { showToast('أدخل اسم التطبيق!'); return; }
+            const img = document.getElementById('csImgData').value;
+            const note = document.getElementById('csNote').value.trim();
+            if (csEditIndex === -1) {
+                comingSoon.push({ name, img, note });
+                showToast('✅ تم إضافة التطبيق');
+            } else {
+                comingSoon[csEditIndex] = { name, img, note };
+                showToast('✅ تم التعديل');
+            }
+            syncDataToFirebase();
+            closeCSModal();
+            renderComingSoon();
+        }
+
+        function closeCSModal() {
+            document.getElementById('comingSoonModalOverlay').classList.add('hidden');
+            csEditIndex = -1;
+        }
+
+        function loadCSImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('csImgData').value = e.target.result;
+                document.getElementById('csImgPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function pasteCSImage() {
+            try {
+                const items = await navigator.clipboard.read();
+                for (const item of items) {
+                    for (const type of item.types) {
+                        if (type.startsWith('image/')) {
+                            const blob = await item.getType(type);
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                document.getElementById('csImgData').value = e.target.result;
+                                document.getElementById('csImgPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+                            };
+                            reader.readAsDataURL(blob);
+                            return;
+                        }
+                    }
+                }
+                showToast('لا توجد صورة في الحافظة!');
+            } catch(e) { showToast('انسخ صورة أولاً ثم اضغط لصق'); }
+        }
+
+        function clearCSImage() {
+            document.getElementById('csImgData').value = '';
+            document.getElementById('csImgFile').value = '';
+            document.getElementById('csImgPreview').innerHTML = '<span style="color:rgba(255,255,255,0.3);font-size:28px;">📱</span>';
+        }
+
         // ===== سحب وإفلات المشتركين =====
         let subDragSrcIdx = null;
         function initSubDragDrop() {
@@ -2105,7 +2280,7 @@
             el.classList.remove('hidden');
             if (viewId === 'accountsManagementView') renderAccounts();
             if (viewId === 'trashView') renderTrash();
-            if (viewId === 'appAccountsView') { updateAppStats(); }
+            if (viewId === 'appAccountsView') { updateAppStats(); renderComingSoon(); }
             if (viewId === 'appCategoryView') renderAppAccounts();
             if (viewId === 'settingsView') renderSettings();
             if (viewId === 'expiredAccountsView') renderExpiredAccounts();
