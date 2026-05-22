@@ -1217,6 +1217,37 @@
         </div>
     </div>
 
+    <!-- نافذة نقل تطبيق قريباً للقائمة الرئيسية -->
+    <div id="moveToListModalOverlay" class="modal-overlay hidden">
+        <div class="modal" style="border-color:rgba(46,204,113,0.4);">
+            <h3 id="moveToListTitle" style="color:#2ecc71;">➡️ نقل للقائمة</h3>
+            <p id="moveToListSubtitle" style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:16px;text-align:center;"></p>
+
+            <div class="modal-field">
+                <label>القسم</label>
+                <select id="moveCategory" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(46,204,113,0.3);background:#0d3d36;color:#fff;font-family:'Cairo';font-size:13px;outline:none;cursor:pointer;">
+                    <option value="permanent">♾️ اشتراكات دائمة</option>
+                    <option value="monthly">🔄 اشتراكات شهرية</option>
+                    <option value="yearly">🗓️ اشتراكات سنوية</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>النظام</label>
+                <select id="moveOs" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(46,204,113,0.3);background:#0d3d36;color:#fff;font-family:'Cairo';font-size:13px;outline:none;cursor:pointer;">
+                    <option value="android">🤖 Android</option>
+                    <option value="ios">🍎 iOS</option>
+                </select>
+            </div>
+            <div class="modal-field"><label>الإيميل</label><input id="moveEmail" type="email" placeholder="user@app.com"></div>
+            <div class="modal-field"><label>الرمز</label><input id="movePassword" type="text" placeholder="123456"></div>
+            <div class="modal-field"><label>التكلفة (د.ع)</label><input id="moveCost" type="number" placeholder="0" min="0"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeMoveToListModal()">إلغاء</button>
+                <button class="btn-save" style="background:linear-gradient(135deg,#2ecc71,#27ae60);" onclick="confirmMoveToList()">نقل ✅</button>
+            </div>
+        </div>
+    </div>
+
     <!-- نافذة إضافة/تعديل تطبيق قريباً -->
     <div id="comingSoonModalOverlay" class="modal-overlay hidden">
         <div class="modal" style="border-color:rgba(243,156,18,0.4);">
@@ -1857,6 +1888,59 @@
                 </div>`;
         }
 
+        let moveCSIndex = -1;
+
+        function openMoveToListModal(i) {
+            moveCSIndex = i;
+            const app = comingSoon[i];
+            document.getElementById('moveToListTitle').textContent = '➡️ نقل: ' + app.name;
+            document.getElementById('moveToListSubtitle').textContent = 'اختر القسم والنظام لإضافة "' + app.name + '" للقائمة';
+            document.getElementById('moveEmail').value = '';
+            document.getElementById('movePassword').value = '';
+            document.getElementById('moveCost').value = '';
+            document.getElementById('moveToListModalOverlay').classList.remove('hidden');
+        }
+
+        function closeMoveToListModal() {
+            document.getElementById('moveToListModalOverlay').classList.add('hidden');
+            moveCSIndex = -1;
+        }
+
+        function confirmMoveToList() {
+            if (moveCSIndex === -1) return;
+            const app = comingSoon[moveCSIndex];
+            const category = document.getElementById('moveCategory').value;
+            const os = document.getElementById('moveOs').value;
+            const email = document.getElementById('moveEmail').value.trim();
+            const password = document.getElementById('movePassword').value.trim();
+            const cost = parseFloat(document.getElementById('moveCost').value) || 0;
+
+            if (!email || !password) { showToast('أدخل الإيميل والرمز!'); return; }
+
+            // إضافة للقائمة الرئيسية
+            appAccounts.push({
+                name: app.name,
+                emoji: app.img || '📱',
+                email,
+                password,
+                cost,
+                category,
+                os,
+                subscribers: [],
+                start: '',
+                end: ''
+            });
+
+            // حذف من قريباً
+            comingSoon.splice(moveCSIndex, 1);
+
+            syncDataToFirebase();
+            closeMoveToListModal();
+            renderComingSoon();
+            updateAppStats();
+            showToast(`✅ تم نقل "${app.name}" إلى القائمة`);
+        }
+
         // ===== قريباً =====
         let csEditIndex = -1;
 
@@ -1877,6 +1961,7 @@
                     <div style="position:absolute;top:6px;left:6px;display:flex;gap:3px;">
                         <button onclick="editComingSoon(${i})" style="background:rgba(255,255,255,0.07);border:none;border-radius:6px;padding:3px 5px;color:rgba(255,255,255,0.5);cursor:pointer;font-size:10px;"><i class="fas fa-edit"></i></button>
                         <button onclick="deleteComingSoon(${i})" style="background:rgba(231,76,60,0.1);border:none;border-radius:6px;padding:3px 5px;color:#e74c3c;cursor:pointer;font-size:10px;"><i class="fas fa-trash"></i></button>
+                        <button onclick="openMoveToListModal(${i})" style="background:rgba(46,204,113,0.1);border:none;border-radius:6px;padding:3px 5px;color:#2ecc71;cursor:pointer;font-size:10px;" title="نقل للقائمة"><i class="fas fa-arrow-left"></i></button>
                     </div>
                     <div style="width:50px;height:50px;margin:16px auto 8px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(243,156,18,0.1);">
                         ${app.img && app.img.startsWith('data:')
