@@ -1433,7 +1433,7 @@
             }
         } catch(e) {}
 
-        // دائماً isDataLoaded = true فوراً (الكاش كافٍ للبدء)
+        // دائماً isDataLoaded = true فوراً (الكاش أو البيانات الافتراضية كافية)
         isDataLoaded = true;
 
         // تسجيل دخول تلقائي فوري
@@ -1448,9 +1448,18 @@
             }
         }
 
-        // ② تحديث من Firebase في الخلفية (بدون تأثير على الواجهة)
+        // ② تحديث من Firebase في الخلفية مع timeout
         if (db) {
+            const fbTimeout = setTimeout(() => {
+                // إذا تأخر Firebase أكثر من 4 ثوانٍ → اعمل بالكاش
+                if (!isDataLoaded) {
+                    isDataLoaded = true;
+                    showToast('⚡ يعمل بوضع الكاش المحلي');
+                }
+            }, 4000);
+
             db.ref('storeData').once('value', (snapshot) => {
+                clearTimeout(fbTimeout);
                 const data = snapshot.val();
                 if (data) {
                     accounts = data.accounts || [];
