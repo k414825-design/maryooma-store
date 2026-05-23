@@ -115,8 +115,9 @@
         .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212,175,55,0.3); }
 
         /* --- لوحة التحكم --- */
-        .dashboard-view { display: flex; flex-direction: column; gap: 20px; }
+        .dashboard-view { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 4px 0; }
         .dashboard-view.hidden { display: none !important; }
+        @media (max-width: 400px) { .dashboard-view { grid-template-columns: repeat(2, 1fr); } }
         .info-card { background: var(--glass-bg); backdrop-filter: blur(20px); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.3s; }
         .info-card:hover { border-color: var(--primary-gold); }
 
@@ -468,35 +469,28 @@
 
     <!-- لوحة التحكم -->
     <div id="dashboardView" class="view dashboard-view hidden">
-        <div class="info-card">
-            <div style="font-size: 50px; margin-bottom: 5px;">🤖</div>
-            <h3>ChatGPT</h3>
-            <p>إدارة اشتراكات ChatGPT</p>
-            <button class="btn-gold" onclick="showView('accountsManagementView')">فتح الحسابات</button>
+        <!-- بطاقة ChatGPT -->
+        <div class="info-card" style="padding:20px 16px;">
+            <div style="font-size:36px;margin-bottom:8px;">🤖</div>
+            <h3 style="font-size:16px;margin:0 0 4px;">ChatGPT</h3>
+            <p style="font-size:12px;margin:0 0 12px;color:rgba(255,255,255,0.5);">إدارة اشتراكات ChatGPT</p>
+            <button class="btn-gold" style="padding:8px 20px;font-size:13px;" onclick="showView('accountsManagementView')">فتح الحسابات</button>
         </div>
-        <div class="info-card" style="border-color: rgba(52,152,219,0.3);">
-            <div style="font-size: 50px; margin-bottom: 5px;">📱</div>
-            <h3>App</h3>
-            <p>إدارة اشتراكات التطبيقات</p>
-            <button class="btn-gold" style="background: linear-gradient(135deg,#3498db,#2980b9); color:#fff;" onclick="showView('appAccountsView')">فتح التطبيقات</button>
+
+        <!-- بطاقة App -->
+        <div class="info-card" style="border-color:rgba(52,152,219,0.3);padding:20px 16px;">
+            <div style="font-size:36px;margin-bottom:8px;">📱</div>
+            <h3 style="font-size:16px;margin:0 0 4px;">App</h3>
+            <p style="font-size:12px;margin:0 0 12px;color:rgba(255,255,255,0.5);">إدارة اشتراكات التطبيقات</p>
+            <button class="btn-gold" style="background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;padding:8px 20px;font-size:13px;" onclick="showView('appAccountsView')">فتح التطبيقات</button>
         </div>
-        <div class="info-card" style="border-color: rgba(231,76,60,0.2);">
-            <i class="fas fa-trash-restore" style="font-size: 40px; color: #e74c3c;"></i>
-            <h3>سلة المهملات</h3>
-            <p>استعادة الحسابات المحذوفة</p>
-            <button class="btn-gold" style="background: linear-gradient(135deg,#e74c3c,#c0392b); color:#fff;" onclick="showView('trashView')">فتح السلة</button>
-        </div>
-        <div class="info-card" style="border-color: rgba(149,165,166,0.3);">
-            <div style="font-size: 50px; margin-bottom: 5px;">⚙️</div>
-            <h3>الإعدادات</h3>
-            <p>إدارة حسابات الدخول والمشرفين</p>
-            <button class="btn-gold" style="background: linear-gradient(135deg,#7f8c8d,#636e72); color:#fff;" onclick="showView('settingsView')">فتح الإعدادات</button>
-        </div>
-        <div class="info-card" style="border-color: rgba(52,152,219,0.3);">
-            <div style="font-size: 50px; margin-bottom: 5px;">💾</div>
-            <h3>نسخ احتياطي</h3>
-            <p>تصدير واستيراد البيانات</p>
-            <button class="btn-gold" style="background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;" onclick="showView('backupView')">فتح النسخ</button>
+
+        <!-- بطاقة الإعدادات -->
+        <div class="info-card" style="border-color:rgba(149,165,166,0.3);padding:20px 16px;">
+            <div style="font-size:36px;margin-bottom:8px;">⚙️</div>
+            <h3 style="font-size:16px;margin:0 0 4px;">الإعدادات</h3>
+            <p style="font-size:12px;margin:0 0 12px;color:rgba(255,255,255,0.5);">إدارة الدخول والمشرفين</p>
+            <button class="btn-gold" style="background:linear-gradient(135deg,#7f8c8d,#636e72);color:#fff;padding:8px 20px;font-size:13px;" onclick="showView('settingsView')">فتح الإعدادات</button>
         </div>
     </div>
 
@@ -1155,6 +1149,18 @@
                 </button>
             </div>
 
+            <!-- نسخ احتياطي وسلة المهملات -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+                <button onclick="showView('backupView')" style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.3);border-radius:14px;padding:14px;color:#3498db;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
+                    <div style="font-size:24px;margin-bottom:6px;">💾</div>
+                    نسخ احتياطي
+                </button>
+                <button onclick="showView('trashView')" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:14px;padding:14px;color:#e74c3c;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
+                    <div style="font-size:24px;margin-bottom:6px;">🗑️</div>
+                    سلة المهملات
+                </button>
+            </div>
+
             <span class="back-link" onclick="showView('dashboardView')">← العودة للرئيسي</span>
         </div>
     </div>
@@ -1408,40 +1414,42 @@
         let editIndex = -1;
         const viewHistory = [];
         let isDataLoaded = false;
+        let rememberMe = false;
+        let savedCredentials = null;
 
-        // الاستماع المباشر للتغييرات في Firebase
+        // ① تحميل فوري من الكاش المحلي - بدون انتظار Firebase
+        try {
+            const cached = localStorage.getItem('maryoomaCache');
+            if (cached) {
+                const data = JSON.parse(cached);
+                accounts = data.accounts || [];
+                appAccounts = data.appAccounts || [];
+                trash = data.trash || [];
+                users = data.users || [{ name: 'المدير', username: 'karar', password: '9129', isMain: true }];
+                admins = data.admins || [];
+                cumulativeProfit = data.cumulativeProfit || 0;
+                lastMonthCheck = data.lastMonthCheck || '';
+                comingSoon = data.comingSoon || [];
+            }
+        } catch(e) {}
+
+        // دائماً isDataLoaded = true فوراً (الكاش كافٍ للبدء)
+        isDataLoaded = true;
+
+        // تسجيل دخول تلقائي فوري
+        if (savedCredentials && !currentLoggedUser) {
+            const allUsers = [...users, ...admins];
+            const match = allUsers.find(u => u.username === savedCredentials.username && u.password === savedCredentials.password);
+            if (match) {
+                currentLoggedUser = match;
+                showView('dashboardView');
+                document.getElementById('bellWrapper').style.display = 'block';
+                checkNotifications();
+            }
+        }
+
+        // ② تحديث من Firebase في الخلفية (بدون تأثير على الواجهة)
         if (db) {
-            // ① تحميل فوري من الكاش المحلي
-            try {
-                const cached = localStorage.getItem('maryoomaCache');
-                if (cached) {
-                    const data = JSON.parse(cached);
-                    accounts = data.accounts || [];
-                    appAccounts = data.appAccounts || [];
-                    trash = data.trash || [];
-                    users = data.users || [{ name: 'المدير', username: 'karar', password: '9129', isMain: true }];
-                    admins = data.admins || [];
-                    cumulativeProfit = data.cumulativeProfit || 0;
-                    lastMonthCheck = data.lastMonthCheck || '';
-                    comingSoon = data.comingSoon || [];
-                    isDataLoaded = true;
-
-                    // تسجيل دخول تلقائي من الكاش
-                    if (savedCredentials && !currentLoggedUser) {
-                        const allUsers = [...users, ...admins];
-                        const match = allUsers.find(u => u.username === savedCredentials.username && u.password === savedCredentials.password);
-                        if (match) {
-                            currentLoggedUser = match;
-                            showView('dashboardView');
-                            document.getElementById('bellWrapper').style.display = 'block';
-                            checkNotifications();
-                            registerFCMToken();
-                        }
-                    }
-                }
-            } catch(e) {}
-
-            // ② تحديث من Firebase في الخلفية
             db.ref('storeData').once('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -1518,9 +1526,19 @@
                         checkNotifications();
                     }
                 }
-            }).catch(() => { isDataLoaded = true; });
-        } else {
-            isDataLoaded = true;
+                // تحديث الواجهة إذا كان المستخدم مسجل دخول
+                if (currentLoggedUser) {
+                    const cv = viewHistory[viewHistory.length - 1];
+                    if (cv === 'accountsManagementView') renderAccounts();
+                    if (cv === 'appAccountsView') updateAppStats();
+                    if (cv === 'accountDetailsView' && currentDetailIndex !== -1) renderSubTable();
+                }
+                // حفظ في الكاش بعد تحديث Firebase
+                try {
+                    const cacheData = { accounts, appAccounts, trash, users, admins, cumulativeProfit, lastMonthCheck, comingSoon };
+                    localStorage.setItem('maryoomaCache', JSON.stringify(cacheData));
+                } catch(e) {}
+            }).catch(() => {});
         }
 
         // دالة المزامنة مع Firebase
@@ -1553,9 +1571,6 @@
         function saveUsersToStorage() {
             syncDataToFirebase();
         }
-
-        let rememberMe = false;
-        let savedCredentials = null;
 
         // تحميل البيانات المحفوظة
         (function initLogin() {
@@ -2338,12 +2353,10 @@
         }
 
         function doLogin() {
-            if (!isDataLoaded) {
-                showToast('جاري الاتصال بقاعدة البيانات، يرجى الانتظار...');
-                return;
-            }
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
+            if (!username || !password) { showToast('أدخل بيانات الدخول!'); return; }
+
             const allUsers = [...users, ...admins];
             const match = allUsers.find(u => u.username === username && u.password === password);
             if (!match) {
@@ -2358,9 +2371,25 @@
             document.getElementById('bellWrapper').style.display = 'block';
             checkNotifications();
             registerFCMToken();
-            // طلب إذن الإشعارات
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
+
+            // إذا لم تُحمَّل البيانات من Firebase بعد، حمّلها الآن
+            if (db && !isDataLoaded) {
+                db.ref('storeData').once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        const d = snapshot.val();
+                        accounts = d.accounts || accounts;
+                        appAccounts = d.appAccounts || appAccounts;
+                        trash = d.trash || trash;
+                        users = d.users || users;
+                        admins = d.admins || admins;
+                        cumulativeProfit = d.cumulativeProfit || cumulativeProfit;
+                        comingSoon = d.comingSoon || comingSoon;
+                        isDataLoaded = true;
+                        renderAccounts();
+                        updateAppStats();
+                        try { localStorage.setItem('maryoomaCache', JSON.stringify({accounts, appAccounts, trash, users, admins, cumulativeProfit, lastMonthCheck, comingSoon})); } catch(e) {}
+                    }
+                });
             }
         }
         // تحميل الإعدادات المحفوظة
