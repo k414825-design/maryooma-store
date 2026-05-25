@@ -93,44 +93,116 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-        .view { width: 100%; max-width: 500px; animation: fadeInUp 0.5s ease-out; margin: auto; }
+        .view { width: 100%; max-width: 500px; animation: fadeInUp 0.35s cubic-bezier(0.16,1,0.3,1); margin: auto; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
 
         /* --- واجهة تسجيل الدخول --- */
+        /* ===== بطاقة تسجيل الدخول ===== */
         .card {
-            background: var(--glass-bg); backdrop-filter: blur(25px); border-radius: 40px;
-            padding: 40px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 28px;
+            padding: 36px 28px;
+            text-align: center;
+            border: 1px solid rgba(212,175,55,0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
         }
 
-        .logo-container { width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; border: 2px solid var(--primary-gold); padding: 5px; overflow: hidden; }
+        .logo-container {
+            width: 96px; height: 96px; margin: 0 auto 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(212,175,55,0.5);
+            padding: 4px; overflow: hidden;
+            box-shadow: 0 0 24px rgba(212,175,55,0.2);
+        }
         .logo-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-        .field-wrapper { position: relative; margin-bottom: 20px; text-align: right; }
-        .field-wrapper input { width: 100%; padding: 14px 45px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: #fff; font-family: 'Cairo'; outline: none; font-size: 15px; }
-        .field-wrapper input:focus { border-color: var(--primary-gold); }
-        .field-wrapper i { position: absolute; right: 15px; top: 16px; color: rgba(255,255,255,0.4); }
+        /* ===== حقول الإدخال ===== */
+        .field-wrapper { position: relative; margin-bottom: 14px; text-align: right; }
+        .field-wrapper input {
+            width: 100%; padding: 14px 44px 14px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; color: #fff;
+            font-family: 'Cairo'; outline: none; font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .field-wrapper input:focus {
+            border-color: rgba(212,175,55,0.6);
+            background: rgba(255,255,255,0.09);
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+        }
+        .field-wrapper i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.3); font-size: 14px; }
 
-        .btn-gold { width: 100%; padding: 16px; background: var(--gold-gradient); border: none; border-radius: 15px; font-weight: 700; cursor: pointer; color: #1a1a1a; font-size: 16px; transition: 0.3s; font-family: 'Cairo'; }
-        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(212,175,55,0.3); }
+        /* ===== الأزرار ===== */
+        .btn-gold {
+            width: 100%; padding: 14px; background: var(--gold-gradient);
+            border: none; border-radius: 14px; font-weight: 700; cursor: pointer;
+            color: #1a1a1a; font-size: 15px; transition: all 0.25s ease;
+            font-family: 'Cairo'; letter-spacing: 0.3px;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+        }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,175,55,0.4); }
+        .btn-gold:active { transform: translateY(0); }
 
-        /* --- لوحة التحكم --- */
-        .dashboard-view { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 4px 0; }
+        /* ===== الداشبورد ===== */
+        .dashboard-view { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 4px 0; }
         .dashboard-view.hidden { display: none !important; }
         @media (max-width: 400px) { .dashboard-view { grid-template-columns: repeat(2, 1fr); } }
-        .info-card { background: var(--glass-bg); backdrop-filter: blur(20px); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); text-align: center; transition: 0.3s; }
-        .info-card:hover { border-color: var(--primary-gold); }
+
+        .info-card {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(20px);
+            padding: 20px 14px; border-radius: 22px;
+            border: 1px solid rgba(255,255,255,0.07);
+            text-align: center; transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .info-card:hover {
+            border-color: rgba(212,175,55,0.35);
+            background: rgba(255,255,255,0.07);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .info-card h3 { font-size: 14px; margin: 0 0 4px; color: #fff; font-weight: 700; }
+        .info-card p { font-size: 11px; color: rgba(255,255,255,0.4); margin: 0 0 12px; line-height: 1.4; }
 
         /* --- قائمة الحسابات --- */
         .accounts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn-add { background: var(--gold-gradient); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: 'Cairo'; font-size: 14px; color: #1a1a1a; transition: 0.3s; }
         .btn-add:hover { transform: translateY(-2px); }
 
-        .accounts-list { display: flex; flex-direction: column; gap: 12px; max-height: 420px; overflow-y: auto; padding-left: 5px; }
-        .accounts-list::-webkit-scrollbar { width: 4px; }
-        .accounts-list::-webkit-scrollbar-thumb { background: var(--primary-gold); border-radius: 4px; }
-        #appAccountsList { display: grid !important; flex-direction: unset !important; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; max-height: none; padding: 4px 0; }
-        #accountsList { display: grid !important; flex-direction: unset !important; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; max-height: none; padding: 4px 0; }
+        .accounts-list { display: flex; flex-direction: column; gap: 10px; max-height: 420px; overflow-y: auto; padding-left: 4px; }
+        .accounts-list::-webkit-scrollbar { width: 3px; }
+        .accounts-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.4); border-radius: 4px; }
+        #accountsList, #appAccountsList { display: grid !important; flex-direction: unset !important; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; max-height: none; padding: 4px 0; }
+
+        /* ===== المودال ===== */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+        .modal {
+            background: #0a2e29; border-radius: 24px; padding: 24px;
+            width: 100%; max-width: 420px; border: 1px solid rgba(212,175,55,0.2);
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal h3 { margin: 0 0 20px; font-size: 17px; }
+        .modal-field { margin-bottom: 14px; text-align: right; }
+        .modal-field label { display: block; font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.3px; }
+        .modal-field input, .modal-field select, .modal-field textarea {
+            width: 100%; padding: 11px 14px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; color: #fff; font-family: 'Cairo'; font-size: 13px; outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-field input:focus, .modal-field select:focus { border-color: rgba(212,175,55,0.5); background: rgba(255,255,255,0.09); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: rgba(255,255,255,0.7); font-family: 'Cairo'; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+        .btn-save { flex: 1; padding: 12px; background: var(--gold-gradient); border: none; border-radius: 12px; color: #1a1a1a; font-family: 'Cairo'; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
 
         .account-item {
             background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 18px;
@@ -269,10 +341,13 @@
             .info-card { padding: 20px 14px; }
         }
         .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--gold-gradient); color: #1a1a1a; padding: 12px 25px;
-            border-radius: 25px; font-weight: 700; font-size: 14px; z-index: 9999;
-            animation: fadeInUp 0.3s ease-out;
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+            background: rgba(10,30,26,0.95); color: #fff; padding: 12px 22px;
+            border-radius: 50px; font-weight: 600; font-size: 13px; z-index: 9999;
+            border: 1px solid rgba(212,175,55,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            animation: fadeInUp 0.3s cubic-bezier(0.16,1,0.3,1);
+            white-space: nowrap;
         }
 
         /* --- أيقونة المجلد الذهبية --- */
@@ -305,13 +380,13 @@
         }
         .btn-pdf:hover { background: rgba(46,204,113,0.25); transform: translateY(-2px); }
 
-        .sub-table-wrap { overflow-x: auto; border-radius: 16px; }
+        .sub-table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
         .sub-table { width: 100%; border-collapse: collapse; min-width: 480px; }
-        .sub-table th { background: rgba(212,175,55,0.12); color: var(--primary-gold); padding: 10px 12px; font-size: 13px; font-weight: 700; text-align: center; white-space: nowrap; }
-        .sub-table td { padding: 10px 12px; text-align: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; white-space: nowrap; }
+        .sub-table th { background: rgba(212,175,55,0.1); color: var(--primary-gold); padding: 10px 12px; font-size: 12px; font-weight: 700; text-align: center; white-space: nowrap; letter-spacing: 0.3px; border-bottom: 1px solid rgba(212,175,55,0.15); }
+        .sub-table td { padding: 10px 12px; text-align: center; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; white-space: nowrap; }
         .sub-table th:first-child, .sub-table td:first-child { min-width: 36px; }
         .sub-table tr:last-child td { border-bottom: none; }
-        .sub-table tr:hover td { background: rgba(255,255,255,0.04); }
+        .sub-table tr:hover td { background: rgba(255,255,255,0.03); }
 
         /* حالة الدفع */
         .status-dot { width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer; transition: 0.25s; display: inline-block; box-shadow: 0 0 8px rgba(0,0,0,0.3); }
@@ -492,6 +567,20 @@
             <p style="font-size:12px;margin:0 0 12px;color:rgba(255,255,255,0.5);">إدارة الدخول والمشرفين</p>
             <button class="btn-gold" style="background:linear-gradient(135deg,#7f8c8d,#636e72);color:#fff;padding:8px 20px;font-size:13px;" onclick="showView('settingsView')">فتح الإعدادات</button>
         </div>
+
+        <!-- بطاقة سلة المهملات -->
+        <div class="info-card" style="border-color:rgba(231,76,60,0.25);padding:20px 16px;grid-column:span 3;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:28px;">🗑️</span>
+                    <div style="text-align:right;">
+                        <div style="font-weight:700;font-size:14px;">سلة المهملات</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.4);">العناصر المحذوفة</div>
+                    </div>
+                </div>
+                <button class="btn-gold" style="background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;padding:8px 18px;font-size:12px;width:auto;" onclick="showView('trashView')">فتح السلة</button>
+            </div>
+        </div>
     </div>
 
     <!-- قائمة الحسابات المنتهية -->
@@ -667,23 +756,12 @@
                 </div>
             </div>
 
-            <!-- زر التفعيل -->
-            <button onclick="activateAccountDetail()" style="
-                width:100%;
-                background:linear-gradient(135deg,#2ecc71,#27ae60);
-                border:none;
-                border-radius:14px;
-                padding:13px;
-                color:#fff;
-                font-family:'Cairo';
-                font-size:15px;
-                font-weight:700;
-                cursor:pointer;
-                margin:14px 0 4px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                gap:8px;
+            <!-- زر التفعيل - يظهر فقط للحسابات المنتهية -->
+            <button id="activateAccountBtn" onclick="activateAccountDetail()" style="
+                width:100%; background:linear-gradient(135deg,#2ecc71,#27ae60);
+                border:none; border-radius:14px; padding:13px; color:#fff;
+                font-family:'Cairo'; font-size:15px; font-weight:700; cursor:pointer;
+                margin:14px 0 4px; display:flex; align-items:center; justify-content:center; gap:8px;
             "><i class="fas fa-play"></i> تفعيل</button>
             <span class="back-link" onclick="showView('accountsManagementView')">← العودة للحسابات</span>
 
@@ -1282,6 +1360,19 @@
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeCSModal()">إلغاء</button>
                 <button class="btn-save" style="background:linear-gradient(135deg,#f39c12,#e67e22);" onclick="saveComingSoon()">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد مخصصة -->
+    <div id="confirmModalOverlay" class="modal-overlay hidden">
+        <div class="modal" style="max-width:340px;text-align:center;">
+            <div id="confirmIcon" style="font-size:44px;margin-bottom:12px;">⚠️</div>
+            <h3 id="confirmTitle" style="margin:0 0 8px;font-size:17px;color:#fff;">تأكيد</h3>
+            <p id="confirmMsg" style="color:rgba(255,255,255,0.5);font-size:13px;margin:0 0 20px;line-height:1.6;"></p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="resolveConfirm(false)">إلغاء</button>
+                <button id="confirmOkBtn" class="btn-save" onclick="resolveConfirm(true)">تأكيد</button>
             </div>
         </div>
     </div>
@@ -2192,6 +2283,51 @@
             if (el) el.textContent = name;
         }
 
+        // ===== نافذة تأكيد مخصصة =====
+        let confirmResolve = null;
+        function showConfirm(msg, title = 'تأكيد', icon = '⚠️', danger = true) {
+            return new Promise(resolve => {
+                confirmResolve = resolve;
+                document.getElementById('confirmIcon').textContent = icon;
+                document.getElementById('confirmTitle').textContent = title;
+                document.getElementById('confirmMsg').textContent = msg;
+                const okBtn = document.getElementById('confirmOkBtn');
+                okBtn.style.background = danger ? 'linear-gradient(135deg,#e74c3c,#c0392b)' : 'var(--gold-gradient)';
+                document.getElementById('confirmModalOverlay').classList.remove('hidden');
+            });
+        }
+        function resolveConfirm(val) {
+            document.getElementById('confirmModalOverlay').classList.add('hidden');
+            if (confirmResolve) { confirmResolve(val); confirmResolve = null; }
+        }
+
+        // تعديل دوال الحذف لتستخدم نافذة التأكيد الجديدة
+        async function deleteAccount(index) {
+            const ok = await showConfirm(`حذف حساب "${accounts[index].name}"؟ سيُنقل لسلة المهملات.`, 'حذف الحساب', '🗑️');
+            if (!ok) return;
+            const deleted = accounts.splice(index, 1)[0];
+            deleted._type = 'account';
+            deleted.deletedAt = new Date().toLocaleDateString('ar-IQ');
+            trash.push(deleted);
+            syncDataToFirebase();
+            renderAccounts();
+            showToast('🗑️ تم الحذف');
+        }
+
+        async function deleteSub(index) {
+            const acc = accounts[currentDetailIndex];
+            const ok = await showConfirm(`حذف المشترك "${acc.subscribers[index].name}"؟`, 'حذف مشترك', '🗑️');
+            if (!ok) return;
+            const deleted = acc.subscribers.splice(index, 1)[0];
+            deleted._type = 'subscriber';
+            deleted._parentName = acc.name;
+            deleted.deletedAt = new Date().toLocaleDateString('ar-IQ');
+            trash.push(deleted);
+            syncDataToFirebase();
+            renderSubTable();
+            showToast('🗑️ تم الحذف');
+        }
+
         function globalSearchSubs(query) {
             const results = document.getElementById('globalSearchResults');
             if (!query.trim()) { results.style.display = 'none'; return; }
@@ -2312,6 +2448,17 @@
             const s = acc.subscribers[index];
             const text = `الاسم: ${s.name}\nتليجرام: ${s.tg||'—'}\nالتاريخ: ${s.date||'—'}\nالحالة: ${s.paid?'دافع':'غير دافع'}\nالسعر: ${(s.price||PRICE_PER_SUB).toLocaleString()} د.ع\nملاحظات: ${s.note||'—'}`;
             navigator.clipboard.writeText(text).then(() => showToast('✅ تم نسخ البيانات'));
+        }
+
+        // رسالة تذكير للمشترك الغير دافع
+        function sendReminder(index) {
+            const acc = accounts[currentDetailIndex];
+            const s = acc.subscribers[index];
+            if (s.paid) { showToast('المشترك دافع بالفعل ✅'); return; }
+            const price = (s.price || PRICE_PER_SUB).toLocaleString();
+            const siteName = localStorage.getItem('siteName') || 'Maryooma Store';
+            const msg = `مرحباً ${s.name} 👋\nتذكير بأن اشتراكك في ${siteName} بمبلغ ${price} د.ع لم يُسدَّد بعد.\nنرجو الدفع في أقرب وقت 🙏`;
+            navigator.clipboard.writeText(msg).then(() => showToast('✅ تم نسخ رسالة التذكير'));
         }
 
         // ========== الرسم البياني ==========
@@ -2573,7 +2720,9 @@
                         </span>
                     </div>
                     <!-- أيقونة واسم -->
-                    <div style="font-size:22px;font-weight:800;color:var(--primary-gold);margin:22px 0 8px;letter-spacing:1px;">${acc.name}</div>
+                    <div style="font-size:22px;font-weight:800;color:var(--primary-gold);margin:22px 0 6px;letter-spacing:1px;">${acc.name}</div>
+                    <!-- تاريخ التفعيل -->
+                    ${acc.start ? `<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;"><i class="fas fa-play" style="font-size:9px;margin-left:3px;"></i>${acc.start}</div>` : ''}
                     <!-- تاريخ الانتهاء وعداد الأيام -->
                     ${endLabel ? (() => {
                         const days = getDaysRemaining(acc.end);
@@ -2735,6 +2884,10 @@
             badge.id = 'expiryBadge';
             badge.className = 'expiry-badge ' + (isExpired ? 'expiry-warn' : 'expiry-ok');
             badge.textContent = isExpired ? 'منتهي ⚠️' : 'نشط ✓';
+
+            // إظهار زر التفعيل فقط للحسابات المنتهية
+            const activateBtn = document.getElementById('activateAccountBtn');
+            if (activateBtn) activateBtn.style.display = isExpired ? 'flex' : 'none';
 
             // إغلاق أي حقل تعديل مفتوح
             document.getElementById('startEditWrapper').classList.remove('active');
@@ -3220,6 +3373,7 @@
                                 <button class="sub-del-btn" onclick="deleteSub(${realIdx})"><i class="fas fa-trash"></i></button>
                                 <button onclick="copySubData(${realIdx})" style="background:rgba(255,255,255,0.07);border:none;border-radius:6px;padding:4px 6px;color:rgba(255,255,255,0.5);cursor:pointer;font-size:11px;" title="نسخ البيانات"><i class="fas fa-copy"></i></button>
                                 <button onclick="openTransferModal(${realIdx})" style="background:rgba(212,175,55,0.1);border:none;border-radius:6px;padding:4px 6px;color:#d4af37;cursor:pointer;font-size:11px;" title="نقل لحساب آخر"><i class="fas fa-exchange-alt"></i></button>
+                                ${!s.paid ? `<button onclick="sendReminder(${realIdx})" style="background:rgba(231,76,60,0.1);border:none;border-radius:6px;padding:4px 6px;color:#e74c3c;cursor:pointer;font-size:11px;" title="نسخ رسالة تذكير"><i class="fas fa-bell"></i></button>` : ''}
                             </td>
                         </tr>`;
                 });
@@ -3388,10 +3542,10 @@
                         </span>
                     </div>
                     <!-- صورة أو أيقونة -->
-                    <div style="width:60px;height:60px;margin:14px auto 8px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(52,152,219,0.1);">
-                        ${acc.emoji && acc.emoji.startsWith('data:')
-                            ? `<img src="${acc.emoji}" style="width:100%;height:100%;object-fit:cover;">`
-                            : `<span style="font-size:32px;">${acc.emoji || '📱'}</span>`}
+                    <div style="width:56px;height:56px;margin:14px auto 8px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(52,152,219,0.08);">
+                        ${acc.emoji && (acc.emoji.startsWith('data:image') || acc.emoji.startsWith('http'))
+                            ? `<img src="${acc.emoji}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=font-size:28px>📱</span>'">`
+                            : `<span style="font-size:28px;">${(!acc.emoji || acc.emoji.length > 10) ? '📱' : acc.emoji}</span>`}
                     </div>
                     <div style="font-weight:700;font-size:14px;color:#3498db;margin-bottom:8px;">${acc.name}</div>
                     <!-- تاريخ الانتهاء -->
@@ -3413,8 +3567,26 @@
             currentAppDetailIndex = index;
             const acc = appAccounts[index];
 
-            // العنوان مع emoji
-            document.getElementById('appDetailsTitleText').textContent = (acc.emoji ? acc.emoji + ' ' : '') + acc.name;
+            // العنوان - فقط الاسم بدون emoji إذا كان base64
+            const titleEl = document.getElementById('appDetailsTitleText');
+            if (acc.emoji && (acc.emoji.startsWith('data:image') || acc.emoji.startsWith('http'))) {
+                // صورة - اعرضها فوق العنوان بدلاً من النص
+                titleEl.textContent = acc.name;
+                // أضف صورة صغيرة قبل العنوان
+                let imgEl = document.getElementById('appDetailsTitleImg');
+                if (!imgEl) {
+                    imgEl = document.createElement('img');
+                    imgEl.id = 'appDetailsTitleImg';
+                    imgEl.style.cssText = 'width:40px;height:40px;border-radius:10px;object-fit:cover;display:block;margin:0 auto 8px;';
+                    titleEl.parentElement.insertBefore(imgEl, titleEl);
+                }
+                imgEl.src = acc.emoji;
+                imgEl.style.display = 'block';
+            } else {
+                titleEl.textContent = (acc.emoji && acc.emoji.length <= 4 ? acc.emoji + ' ' : '') + acc.name;
+                const imgEl = document.getElementById('appDetailsTitleImg');
+                if (imgEl) imgEl.style.display = 'none';
+            }
 
             // إيميل ورمز
             document.getElementById('appDetailEmailText').textContent = acc.email || '—';
