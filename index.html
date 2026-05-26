@@ -613,9 +613,17 @@
 
             <!-- تقرير شهري -->
             <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.3);border-radius:16px;padding:20px;margin-bottom:16px;">
-                <h3 style="color:#d4af37;margin:0 0 12px;font-size:15px;"><i class="fas fa-chart-bar"></i> التقرير الشهري</h3>
-                <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:14px;">ملخص الشهر الحالي</p>
+                <h3 style="color:#d4af37;margin:0 0 12px;font-size:15px;"><i class="fas fa-chart-bar"></i> التقرير الشهري الحالي</h3>
                 <div id="monthlyReportBox" style="background:rgba(0,0,0,0.2);border-radius:12px;padding:14px;font-size:13px;"></div>
+            </div>
+
+            <!-- سجل التقارير السابقة -->
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:20px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <h3 style="color:#d4af37;margin:0;font-size:15px;"><i class="fas fa-history"></i> سجل التقارير السابقة</h3>
+                    <button onclick="clearReports()" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:4px 10px;color:#e74c3c;font-family:'Cairo';font-size:11px;cursor:pointer;">مسح الكل</button>
+                </div>
+                <div id="reportsHistoryList"></div>
             </div>
 
             <span class="back-link" onclick="showView('dashboardView')">← العودة للرئيسي</span>
@@ -752,12 +760,21 @@
             </div>
 
             <!-- زر التفعيل - يظهر فقط للحسابات المنتهية -->
-            <button id="activateAccountBtn" onclick="activateAccountDetail()" style="
-                width:100%; background:linear-gradient(135deg,#2ecc71,#27ae60);
-                border:none; border-radius:14px; padding:13px; color:#fff;
-                font-family:'Cairo'; font-size:15px; font-weight:700; cursor:pointer;
-                margin:14px 0 4px; display:flex; align-items:center; justify-content:center; gap:8px;
-            "><i class="fas fa-play"></i> تفعيل</button>
+            <!-- زر التفعيل وزر التقرير -->
+            <div style="display:flex;gap:8px;margin:14px 0 4px;">
+                <button id="activateAccountBtn" onclick="activateAccountDetail()" style="
+                    flex:1; background:linear-gradient(135deg,#2ecc71,#27ae60);
+                    border:none; border-radius:14px; padding:13px; color:#fff;
+                    font-family:'Cairo'; font-size:15px; font-weight:700; cursor:pointer;
+                    display:flex; align-items:center; justify-content:center; gap:8px;
+                "><i class="fas fa-play"></i> تفعيل</button>
+                <button onclick="toggleAccountReports()" id="reportsToggleBtn" style="
+                    background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3);
+                    border-radius:14px; padding:13px 16px; color:#d4af37;
+                    font-family:'Cairo'; font-size:13px; font-weight:700; cursor:pointer;
+                    display:flex; align-items:center; gap:6px; white-space:nowrap;
+                "><i class="fas fa-history"></i> التقارير</button>
+            </div>
             <span class="back-link" onclick="showView('accountsManagementView')">← العودة للحسابات</span>
 
             <!-- جدول المشتركين -->
@@ -796,6 +813,15 @@
                     </table>
                 </div>
                 <div class="summary-box" id="summaryBox"></div>
+
+                <!-- تقارير الحساب السابقة -->
+                <div id="accountReportsSection" style="margin-top:16px;display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <div style="font-weight:700;font-size:14px;color:var(--primary-gold);"><i class="fas fa-history" style="margin-left:6px;"></i>التقارير السابقة</div>
+                        <span id="accountReportsCount" style="background:rgba(212,175,55,0.15);color:#d4af37;font-size:11px;padding:2px 10px;border-radius:20px;border:1px solid rgba(212,175,55,0.3);"></span>
+                    </div>
+                    <div id="accountReportsList"></div>
+                </div>
             </div>
 
             </div>
@@ -1222,15 +1248,11 @@
                 </button>
             </div>
 
-            <!-- نسخ احتياطي وسلة المهملات -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
-                <button onclick="showView('backupView')" style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.3);border-radius:14px;padding:14px;color:#3498db;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
+            <!-- نسخ احتياطي -->
+            <div style="margin-top:8px;">
+                <button onclick="showView('backupView')" style="width:100%;background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.3);border-radius:14px;padding:14px;color:#3498db;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
                     <div style="font-size:24px;margin-bottom:6px;">💾</div>
                     نسخ احتياطي
-                </button>
-                <button onclick="showView('trashView')" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:14px;padding:14px;color:#e74c3c;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
-                    <div style="font-size:24px;margin-bottom:6px;">🗑️</div>
-                    سلة المهملات
                 </button>
             </div>
 
@@ -1481,6 +1503,7 @@
         let cumulativeProfit = 0;
         let lastMonthCheck = '';
         let comingSoon = [];
+        let monthlyReports = []; // تقارير شهرية للحسابات المنتهية
 
         // محاولة استعادة البيانات المحلية كنسخة احتياطية
         try {
@@ -1567,15 +1590,36 @@
                     cumulativeProfit = (data.cumulativeProfit !== undefined && data.cumulativeProfit !== null) ? data.cumulativeProfit : 0;
                     lastMonthCheck = data.lastMonthCheck || '';
 
-                    // فحص الحسابات المنتهية
+                    // فحص الحسابات المنتهية - حفظ تقرير وتغيير المشتركين
                     let changed = false;
                     const today = new Date();
                     accounts.forEach(acc => {
-                        if (acc.end && new Date(acc.end) < today && !acc._profitCounted) {
+                        if (acc.end && new Date(acc.end) < today && !acc._reportSaved) {
                             const subs = acc.subscribers || [];
                             const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
-                            cumulativeProfit += collected - parseFloat(acc.cost || 0);
-                            acc._profitCounted = true;
+                            const cost = parseFloat(acc.cost || 0);
+                            const net = collected - cost;
+
+                            // حفظ التقرير مع تفاصيل المشتركين
+                            if (!acc.reports) acc.reports = [];
+                            acc.reports.unshift({
+                                id: Date.now(),
+                                date: new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' }),
+                                start: acc.start || '—',
+                                end: acc.end || '—',
+                                totalSubs: subs.length,
+                                paidSubs: subs.filter(s => s.paid).length,
+                                unpaidSubs: subs.filter(s => !s.paid).length,
+                                collected,
+                                cost,
+                                net,
+                                // تفاصيل المشتركين
+                                paidList: subs.filter(s => s.paid).map(s => ({ name: s.name, tg: s.tg || '', price: s.price !== undefined ? s.price : PRICE_PER_SUB })),
+                                unpaidList: subs.filter(s => !s.paid).map(s => ({ name: s.name, tg: s.tg || '', price: s.price !== undefined ? s.price : PRICE_PER_SUB }))
+                            });
+                            acc._reportSaved = true;
+
+                            // تغيير أسعار المشتركين
                             subs.forEach(s => {
                                 const oldPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
                                 s.price = !s.paid ? PRICE_PER_SUB + oldPrice : PRICE_PER_SUB;
@@ -1585,11 +1629,27 @@
                         }
                     });
                     appAccounts.forEach(acc => {
-                        if (acc.category !== 'permanent' && acc.end && new Date(acc.end) < today && !acc._profitCounted) {
+                        if (acc.category !== 'permanent' && acc.end && new Date(acc.end) < today && !acc._reportSaved) {
                             const subs = acc.subscribers || [];
                             const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
-                            cumulativeProfit += collected - parseFloat(acc.cost || 0);
-                            acc._profitCounted = true;
+                            const cost = parseFloat(acc.cost || 0);
+                            const net = collected - cost;
+
+                            if (!acc.reports) acc.reports = [];
+                            acc.reports.unshift({
+                                id: Date.now(),
+                                date: new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' }),
+                                start: acc.start || '—',
+                                end: acc.end || '—',
+                                totalSubs: subs.length,
+                                paidSubs: subs.filter(s => s.paid).length,
+                                unpaidSubs: subs.filter(s => !s.paid).length,
+                                collected, cost, net,
+                                paidList: subs.filter(s => s.paid).map(s => ({ name: s.name, tg: s.tg || '', price: s.price !== undefined ? s.price : PRICE_PER_SUB })),
+                                unpaidList: subs.filter(s => !s.paid).map(s => ({ name: s.name, tg: s.tg || '', price: s.price !== undefined ? s.price : PRICE_PER_SUB }))
+                            });
+                            acc._reportSaved = true;
+
                             subs.forEach(s => {
                                 const oldPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
                                 s.price = !s.paid ? PRICE_PER_SUB + oldPrice : PRICE_PER_SUB;
@@ -1619,6 +1679,7 @@
                     if (changed) syncDataToFirebase();
                 }
                 comingSoon = data.comingSoon || [];
+                monthlyReports = data.monthlyReports || [];
                 isDataLoaded = true;
 
                 // تسجيل دخول تلقائي إذا كانت البيانات محفوظة
@@ -1665,6 +1726,7 @@
                 cumulativeProfit: cumulativeProfit,
                 lastMonthCheck: lastMonthCheck,
                 comingSoon: comingSoon,
+                monthlyReports: monthlyReports,
                 _baseSet: true
             }).catch(e => {
                 console.error("Error saving to Firebase: ", e);
@@ -2001,6 +2063,7 @@
 
         // ========== التقرير الشهري ==========
         function renderMonthlyReport() {
+            renderReportsHistory();
             const box = document.getElementById('monthlyReportBox');
             if (!box) return;
             const monthName = new Date().toLocaleDateString('ar-IQ', { month: 'long', year: 'numeric' });
@@ -2469,6 +2532,142 @@
 
         // ========== الرسم البياني ==========
         let profitChartInstance = null;
+        function toggleAccountReports() {
+            const section = document.getElementById('accountReportsSection');
+            const btn = document.getElementById('reportsToggleBtn');
+            if (!section) return;
+            const isVisible = section.style.display !== 'none';
+            section.style.display = isVisible ? 'none' : 'block';
+            if (btn) btn.style.background = isVisible ? 'rgba(212,175,55,0.1)' : 'rgba(212,175,55,0.25)';
+        }
+
+        function renderAccountReports() {
+            const acc = accounts[currentDetailIndex];
+            const reports = acc.reports || [];
+            const section = document.getElementById('accountReportsSection');
+            const list = document.getElementById('accountReportsList');
+            const count = document.getElementById('accountReportsCount');
+            const btn = document.getElementById('reportsToggleBtn');
+            if (!section || !list) return;
+
+            // تحديث الزر دائماً
+            if (btn) {
+                btn.style.display = 'flex';
+                if (reports.length > 0) {
+                    btn.innerHTML = `<i class="fas fa-history"></i> 📅 التقارير <span style="background:rgba(212,175,55,0.3);border-radius:10px;padding:1px 7px;font-size:11px;">${reports.length}</span>`;
+                } else {
+                    btn.innerHTML = `<i class="fas fa-history"></i> 📅 التقارير`;
+                }
+            }
+
+            if (count) count.textContent = reports.length + ' تقرير';
+
+            // القسم مخفي افتراضياً
+            section.style.display = 'none';
+
+            if (reports.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;font-size:12px;padding:16px;">لا توجد تقارير بعد — ستُضاف عند تفعيل الحساب المنتهي</p>';
+                return;
+            }
+
+            list.innerHTML = reports.map((r, i) => {
+                const isProfit = r.net >= 0;
+                const paidList = r.paidList || [];
+                const unpaidList = r.unpaidList || [];
+                return `
+                <div style="background:rgba(0,0,0,0.15);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.25);">📅 ${r.date} | ${r.start} ← ${r.end}</div>
+                        <div style="font-size:14px;font-weight:700;color:${isProfit?'#2ecc71':'#e74c3c'};">
+                            ${isProfit?'+':'-'}${Math.abs(r.net).toLocaleString()} د.ع
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;">
+                        <div style="background:rgba(212,175,55,0.07);border-radius:7px;padding:6px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">المحصول</div>
+                            <div style="font-size:12px;font-weight:700;color:#d4af37;">+${r.collected.toLocaleString()}</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,0.07);border-radius:7px;padding:6px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">التكلفة</div>
+                            <div style="font-size:12px;font-weight:700;color:#e74c3c;">-${r.cost.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+                        <div style="background:rgba(46,204,113,0.07);border-radius:7px;padding:6px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">✅ دافعون</div>
+                            <div style="font-size:13px;font-weight:700;color:#2ecc71;">${r.paidSubs}</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,0.07);border-radius:7px;padding:6px;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:3px;">❌ غير دافعين (${unpaidList.length})</div>
+                            ${unpaidList.map(s => `<div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;">
+                                <span style="color:#fff;">${s.name}</span>
+                                <span style="color:#e74c3c;">${s.price.toLocaleString()}</span>
+                            </div>`).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderReportsHistory() {
+            const list = document.getElementById('reportsHistoryList');
+            if (!list) return;
+            if (!monthlyReports || monthlyReports.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;font-size:12px;padding:10px;">لا توجد تقارير سابقة بعد</p>';
+                return;
+            }
+            list.innerHTML = monthlyReports.map((r, i) => {
+                const isProfit = r.net >= 0;
+                return `
+                <div style="background:rgba(0,0,0,0.2);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <div>
+                            <div style="font-weight:700;color:#fff;font-size:14px;">📁 ${r.accountName}</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">${r.start} ← ${r.end}</div>
+                        </div>
+                        <div style="text-align:left;">
+                            <div style="font-size:15px;font-weight:700;color:${isProfit?'#2ecc71':'#e74c3c'};">
+                                ${isProfit?'+':'-'}${Math.abs(r.net).toLocaleString()} د.ع
+                            </div>
+                            <div style="font-size:10px;color:rgba(255,255,255,0.3);">${r.date}</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:10px;color:rgba(255,255,255,0.4);">المشتركون</div>
+                            <div style="font-size:14px;font-weight:700;color:#fff;">${r.totalSubs}</div>
+                        </div>
+                        <div style="background:rgba(46,204,113,0.08);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:10px;color:rgba(255,255,255,0.4);">دافعون</div>
+                            <div style="font-size:14px;font-weight:700;color:#2ecc71;">${r.paidSubs}</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,0.08);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:10px;color:rgba(255,255,255,0.4);">غير دافعين</div>
+                            <div style="font-size:14px;font-weight:700;color:#e74c3c;">${r.unpaidSubs}</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:10px;color:rgba(255,255,255,0.4);">المحصول</div>
+                            <div style="font-size:12px;font-weight:700;color:#d4af37;">+${r.collected.toLocaleString()} د.ع</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:10px;color:rgba(255,255,255,0.4);">التكلفة</div>
+                            <div style="font-size:12px;font-weight:700;color:#e74c3c;">-${r.cost.toLocaleString()} د.ع</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function clearReports() {
+            if (!confirm('مسح جميع التقارير السابقة؟')) return;
+            monthlyReports = [];
+            syncDataToFirebase();
+            renderReportsHistory();
+            showToast('✅ تم مسح التقارير');
+        }
+
         function renderProfitChart() {
             const canvas = document.getElementById('profitChart');
             if (!canvas) return;
@@ -2635,19 +2834,24 @@
             const list = document.getElementById('accountsList');
             list.innerHTML = '';
 
-            // احتساب أرباح جميع الحسابات (نشطة + منتهية)
+            // احتساب الأرباح والديون للحسابات النشطة فقط
             let grandNet = 0;
             let grandSubs = 0;
             let grandDebt = 0;
+            const today = new Date();
             accounts.forEach(acc => {
                 const subs = acc.subscribers || [];
+                const isExpired = acc.end && new Date(acc.end) < today;
                 grandSubs += subs.length;
-                const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
-                const cost = parseFloat(acc.cost || 0);
-                grandNet += collected - cost;
-                grandDebt += subs.filter(s => !s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
+                if (!isExpired) {
+                    // الحسابات النشطة فقط تُحتسب في الأرباح والديون
+                    const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
+                    const cost = parseFloat(acc.cost || 0);
+                    grandNet += collected - cost;
+                    grandDebt += subs.filter(s => !s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
+                }
             });
-            // إضافة الأرباح التراكمية من الحسابات المنتهية سابقاً
+            // إضافة الأرباح التراكمية (من الحسابات المفعّلة سابقاً)
             const totalProfit = grandNet + cumulativeProfit;
 
             const totalEl = document.getElementById('storeTotalValue');
@@ -2895,12 +3099,17 @@
             const activateBtn = document.getElementById('activateAccountBtn');
             if (activateBtn) activateBtn.style.display = isExpired ? 'flex' : 'none';
 
+            // زر التقارير يظهر دائماً (سيُخفى إذا لم توجد تقارير)
+            const reportsBtn = document.getElementById('reportsToggleBtn');
+            if (reportsBtn) reportsBtn.style.display = 'flex';
+
             // إغلاق أي حقل تعديل مفتوح
             document.getElementById('startEditWrapper').classList.remove('active');
             document.getElementById('endEditWrapper').classList.remove('active');
 
             showView('accountDetailsView');
             renderSubTable();
+            renderAccountReports();
         }
 
         // تتبع الحساب المفتوح حالياً
@@ -3244,9 +3453,49 @@
             endDate.setDate(endDate.getDate() + 1);
             const endStr = endDate.toISOString().split('T')[0];
 
+            // احتساب ربح/خسارة الدورة السابقة وإضافتها للتراكمي
+            if (!acc._profitCounted && acc.end && new Date(acc.end) < today) {
+                const subs = acc.subscribers || [];
+                const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
+                const cost = parseFloat(acc.cost || 0);
+                const net = collected - cost;
+                cumulativeProfit += net;
+
+                // حفظ تقرير خاص بهذا الحساب
+                if (!acc.reports) acc.reports = [];
+                acc.reports.unshift({
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    start: acc.start || '—',
+                    end: acc.end || '—',
+                    totalSubs: subs.length,
+                    paidSubs: subs.filter(s => s.paid).length,
+                    unpaidSubs: subs.filter(s => !s.paid).length,
+                    collected,
+                    cost,
+                    net
+                });
+
+                // حفظ في السجل العام أيضاً
+                monthlyReports.unshift({
+                    id: Date.now(),
+                    accountName: acc.name,
+                    date: new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    start: acc.start || '—',
+                    end: acc.end || '—',
+                    totalSubs: subs.length,
+                    paidSubs: subs.filter(s => s.paid).length,
+                    unpaidSubs: subs.filter(s => !s.paid).length,
+                    collected,
+                    cost,
+                    net
+                });
+            }
+
             acc.start = startDate;
             acc.end = endStr;
-            acc._profitCounted = false; // إعادة تعيين لاحتساب الربح من جديد
+            acc._profitCounted = false;
+            acc._reportSaved = false; // إعادة تعيين لحفظ تقرير الدورة القادمة
 
             // تحديث تاريخ جميع المشتركين
             if (acc.subscribers && acc.subscribers.length > 0) {
@@ -4002,6 +4251,13 @@
             endDate.setMonth(endDate.getMonth() + 1);
             endDate.setDate(endDate.getDate() + 1);
             const endStr = endDate.toISOString().split('T')[0];
+
+            // احتساب ربح/خسارة الدورة السابقة
+            if (!acc._profitCounted && acc.end && new Date(acc.end) < today) {
+                const subs = acc.subscribers || [];
+                const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
+                cumulativeProfit += collected - parseFloat(acc.cost || 0);
+            }
 
             acc.start = startDate;
             acc.end = endStr;
