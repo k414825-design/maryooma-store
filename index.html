@@ -1522,7 +1522,7 @@
 
         let editIndex = -1;
         const viewHistory = [];
-        const CACHE_VERSION = 'v3';
+        const CACHE_VERSION = 'v4';
 
         // مسح الكاش القديم عند تحديث الكود
         try {
@@ -1594,7 +1594,7 @@
                     let changed = false;
                     const today = new Date();
                     accounts.forEach(acc => {
-                        if (acc.end && new Date(acc.end) < today && !acc._reportSaved) {
+                        if (acc.end && isAccountExpired(acc.end) && !acc._reportSaved) {
                             const subs = acc.subscribers || [];
                             const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
                             const cost = parseFloat(acc.cost || 0);
@@ -1621,15 +1621,20 @@
 
                             // تغيير أسعار المشتركين
                             subs.forEach(s => {
-                                const oldPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
-                                s.price = !s.paid ? PRICE_PER_SUB + oldPrice : PRICE_PER_SUB;
+                                const prevDebt = s.debt || 0;
+                                if (!s.paid) {
+                                    s.debt = prevDebt + PRICE_PER_SUB;
+                                } else {
+                                    s.debt = 0;
+                                }
+                                s.price = s.debt > 0 ? s.debt : PRICE_PER_SUB;
                                 s.paid = false;
                             });
                             changed = true;
                         }
                     });
                     appAccounts.forEach(acc => {
-                        if (acc.category !== 'permanent' && acc.end && new Date(acc.end) < today && !acc._reportSaved) {
+                        if (acc.category !== 'permanent' && acc.end && isAccountExpired(acc.end) && !acc._reportSaved) {
                             const subs = acc.subscribers || [];
                             const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
                             const cost = parseFloat(acc.cost || 0);
@@ -1651,8 +1656,13 @@
                             acc._reportSaved = true;
 
                             subs.forEach(s => {
-                                const oldPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
-                                s.price = !s.paid ? PRICE_PER_SUB + oldPrice : PRICE_PER_SUB;
+                                const prevDebt = s.debt || 0;
+                                if (!s.paid) {
+                                    s.debt = prevDebt + PRICE_PER_SUB;
+                                } else {
+                                    s.debt = 0;
+                                }
+                                s.price = s.debt > 0 ? s.debt : PRICE_PER_SUB;
                                 s.paid = false;
                             });
                             changed = true;
@@ -2004,7 +2014,7 @@
         function renderExpiredAccounts() {
             const list = document.getElementById('expiredAccountsList');
             list.innerHTML = '';
-            const expired = accounts.filter(acc => acc.end && new Date(acc.end) < new Date());
+            const expired = accounts.filter(acc => acc.end && isAccountExpired(acc.end));
             if (expired.length === 0) {
                 list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;padding:20px;grid-column:1/-1;">لا توجد حسابات منتهية ✅</p>';
                 return;
@@ -2841,7 +2851,7 @@
             const today = new Date();
             accounts.forEach(acc => {
                 const subs = acc.subscribers || [];
-                const isExpired = acc.end && new Date(acc.end) < today;
+                const isExpired = acc.end && isAccountExpired(acc.end);
                 grandSubs += subs.length;
                 if (!isExpired) {
                     // الحسابات النشطة فقط تُحتسب في الأرباح والديون
@@ -2891,7 +2901,7 @@
             list.style.maxHeight = 'none';
 
             accounts.forEach((acc, index) => {
-                const isExpired = acc.end && new Date(acc.end) < new Date();
+                const isExpired = acc.end && isAccountExpired(acc.end);
                 const subCount = (acc.subscribers || []).length;
 
                 // تاريخ الانتهاء: اليوم والشهر فقط
@@ -3081,7 +3091,7 @@
 
             document.getElementById('detailStart').textContent = acc.start || '—';
 
-            const isExpired = new Date(acc.end) < new Date();
+            const isExpired = isAccountExpired(acc.end);
             document.getElementById('detailEnd').textContent = acc.end || '—';
             // إضافة شارة الحالة بجانب التاريخ في الـ detail-box
             const endBox = document.getElementById('detailEnd').closest('.detail-box');
@@ -3192,12 +3202,13 @@
                     // ③ الحساب منتهٍ → غير دافع + سعر 3500 لجميع المشتركين
                     if (acc.subscribers && acc.subscribers.length > 0) {
                         acc.subscribers.forEach(s => {
-                            const oldPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
+                            const prevDebt = s.debt || 0;
                             if (!s.paid) {
-                                s.price = PRICE_PER_SUB + oldPrice;
+                                s.debt = prevDebt + PRICE_PER_SUB;
                             } else {
-                                s.price = PRICE_PER_SUB;
+                                s.debt = 0;
                             }
+                            s.price = s.debt > 0 ? s.debt : PRICE_PER_SUB;
                             s.paid = false;
                         });
                         renderSubTable();
@@ -3405,6 +3416,16 @@
 
         // ========== المشتركون ==========
         const PRICE_PER_SUB = 3500;
+
+        // فحص انتهاء الحساب بتوقيت بغداد (UTC+3) - ينتهي الساعة 12 مساء
+        function isAccountExpired(endDateStr) {
+            if (!endDateStr) return false;
+            // الساعة 12 مساء بتوقيت بغداد = 21:00 UTC من اليوم السابق
+            const endDate = new Date(endDateStr);
+            // أضف يوم كامل + 21 ساعة UTC (= منتصف الليل بغداد)
+            const expiryTime = new Date(endDate.getTime() + (24 * 60 * 60 * 1000) - (3 * 60 * 60 * 1000));
+            return new Date() >= expiryTime;
+        }
         let subEditIndex = -1;
 
         // فتح نافذة إضافة مشترك
@@ -3454,7 +3475,7 @@
             const endStr = endDate.toISOString().split('T')[0];
 
             // احتساب ربح/خسارة الدورة السابقة وإضافتها للتراكمي
-            if (!acc._profitCounted && acc.end && new Date(acc.end) < today) {
+            if (!acc._profitCounted && acc.end && isAccountExpired(acc.end)) {
                 const subs = acc.subscribers || [];
                 const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
                 const cost = parseFloat(acc.cost || 0);
@@ -3577,7 +3598,14 @@
         // تبديل حالة الدفع
         function togglePaid(idx) {
             const acc = accounts[currentDetailIndex];
-            acc.subscribers[idx].paid = !acc.subscribers[idx].paid;
+            const sub = acc.subscribers[idx];
+            sub.paid = !sub.paid;
+            // عند الدفع: امسح الدين وأعد السعر لـ 3,500
+            if (sub.paid) {
+                sub.debt = 0;
+                sub.price = PRICE_PER_SUB;
+            }
+            syncDataToFirebase();
             renderSubTable();
         }
 
@@ -3593,7 +3621,7 @@
             let subs = acc.subscribers || [];
             const tbody = document.getElementById('subTableBody');
             tbody.innerHTML = '';
-            const isExpired = acc.end && new Date(acc.end) < new Date();
+            const isExpired = acc.end && isAccountExpired(acc.end);
 
             // تطبيق الفلتر
             let filtered = [...subs];
@@ -3760,7 +3788,7 @@
 
             filtered.forEach((acc) => {
                 const index = appAccounts.indexOf(acc);
-                const isExpired = acc.end && new Date(acc.end) < new Date();
+                const isExpired = acc.end && isAccountExpired(acc.end);
                 const subCount = (acc.subscribers || []).length;
 
                 // تاريخ الانتهاء: اليوم والشهر فقط
@@ -4253,7 +4281,7 @@
             const endStr = endDate.toISOString().split('T')[0];
 
             // احتساب ربح/خسارة الدورة السابقة
-            if (!acc._profitCounted && acc.end && new Date(acc.end) < today) {
+            if (!acc._profitCounted && acc.end && isAccountExpired(acc.end)) {
                 const subs = acc.subscribers || [];
                 const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
                 cumulativeProfit += collected - parseFloat(acc.cost || 0);
