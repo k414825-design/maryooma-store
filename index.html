@@ -1083,8 +1083,16 @@
                     </div>
                 </div>
 
-                <!-- زر التفعيل -->
-                <button onclick="activateAppAccount()" style="width:100%;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:14px;padding:13px;color:#fff;font-family:'Cairo';font-size:15px;font-weight:700;cursor:pointer;margin:14px 0;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fas fa-play"></i> تفعيل</button>
+                <!-- زر التفعيل وزر التقارير -->
+                <div style="display:flex;gap:8px;margin:14px 0;">
+                    <button onclick="activateAppAccount()" id="activateAppBtn" style="flex:1;background:linear-gradient(135deg,#2ecc71,#27ae60);border:none;border-radius:14px;padding:13px;color:#fff;font-family:'Cairo';font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fas fa-play"></i> تفعيل</button>
+                    <button onclick="toggleAppReports()" id="appReportsToggleBtn" style="background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.3);border-radius:14px;padding:13px 16px;color:#3498db;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">📅 التقارير</button>
+                </div>
+
+                <!-- قسم التقارير -->
+                <div id="appReportsSection" style="display:none;margin-bottom:14px;">
+                    <div id="appReportsList"></div>
+                </div>
 
                 <!-- سعر التطبيق للشهرية/السنوية -->
                 <div class="perm-stats-card" style="margin-bottom:16px;">
@@ -1101,10 +1109,17 @@
                     <h4>
                         <span>قائمة المشتركين</span>
                         <div style="display:flex; gap:8px; align-items:center;">
-                            <button id="btnRemoveLastAppSub" onclick="removeLastAppSub()" style="display:none;background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.4); border-radius:10px; padding:7px 14px; color:#e74c3c; font-family:'Cairo'; font-size:13px; font-weight:700; cursor:pointer;" title="إلغاء آخر مشترك مضاف">− ناقص</button>
+                            <button id="btnRemoveLastAppSub" onclick="removeLastAppSub()" style="display:none;background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:7px 14px;color:#e74c3c;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">− ناقص</button>
                             <button class="btn-add-sub" style="background:linear-gradient(135deg,#3498db,#2980b9);" onclick="openAddAppSubModal()">+ مشترك جديد</button>
                         </div>
                     </h4>
+                    <!-- بحث وفلترة -->
+                    <input type="text" class="search-box" placeholder="🔍 بحث عن مشترك..." oninput="filterAppSubTable(this.value)" style="margin-bottom:8px;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                        <button onclick="setAppSubFilter('all')" id="app-filter-all" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(212,175,55,0.4);background:rgba(212,175,55,0.2);color:#d4af37;font-family:'Cairo';font-size:12px;cursor:pointer;font-weight:700;">الكل</button>
+                        <button onclick="setAppSubFilter('paid')" id="app-filter-paid" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(46,204,113,0.4);background:transparent;color:rgba(46,204,113,0.7);font-family:'Cairo';font-size:12px;cursor:pointer;">دافع ✅</button>
+                        <button onclick="setAppSubFilter('unpaid')" id="app-filter-unpaid" style="padding:5px 14px;border-radius:20px;border:1px solid rgba(231,76,60,0.4);background:transparent;color:rgba(231,76,60,0.7);font-family:'Cairo';font-size:12px;cursor:pointer;">غير دافع ❌</button>
+                    </div>
                     <div class="sub-table-wrap">
                         <table class="sub-table">
                             <thead>
@@ -2542,6 +2557,15 @@
 
         // ========== الرسم البياني ==========
         let profitChartInstance = null;
+        function deleteReport(index) {
+            const acc = accounts[currentDetailIndex];
+            if (!acc.reports || !acc.reports[index]) return;
+            acc.reports.splice(index, 1);
+            syncDataToFirebase();
+            renderAccountReports();
+            showToast('🗑️ تم حذف التقرير');
+        }
+
         function toggleAccountReports() {
             const section = document.getElementById('accountReportsSection');
             const btn = document.getElementById('reportsToggleBtn');
@@ -2582,8 +2606,11 @@
                 <div style="background:rgba(0,0,0,0.15);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
                         <div style="font-size:10px;color:rgba(255,255,255,0.25);">📅 ${r.date} | ${r.start} ← ${r.end}</div>
-                        <div style="font-size:14px;font-weight:700;color:${isProfit?'#2ecc71':'#e74c3c'};">
-                            ${isProfit?'+':'-'}${Math.abs(r.net).toLocaleString()} د.ع
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <div style="font-size:14px;font-weight:700;color:${isProfit?'#2ecc71':'#e74c3c'};">
+                                ${isProfit?'+':'-'}${Math.abs(r.net).toLocaleString()} د.ع
+                            </div>
+                            <button onclick="deleteReport(${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:7px;padding:3px 7px;color:#e74c3c;cursor:pointer;font-size:11px;"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;">
@@ -3895,6 +3922,7 @@
                 document.getElementById('appDetailEnd').textContent = acc.end || '—';
 
                 renderAppSubTable();
+                renderAppReports();
             }
 
             showView('appDetailsView');
@@ -4205,7 +4233,11 @@
         }
 
         function toggleAppPaid(idx) {
-            appAccounts[currentAppDetailIndex].subscribers[idx].paid = !appAccounts[currentAppDetailIndex].subscribers[idx].paid;
+            const acc = appAccounts[currentAppDetailIndex];
+            const sub = acc.subscribers[idx];
+            sub.paid = !sub.paid;
+            if (sub.paid) { sub.debt = 0; sub.price = PRICE_PER_SUB; }
+            syncDataToFirebase();
             renderAppSubTable();
             updateAppStats();
             updatePermStats();
@@ -4274,16 +4306,32 @@
             endDate.setDate(endDate.getDate() + 1);
             const endStr = endDate.toISOString().split('T')[0];
 
-            // احتساب ربح/خسارة الدورة السابقة
+            // احتساب ربح/خسارة الدورة السابقة + حفظ تقرير
             if (!acc._profitCounted && acc.end && isAccountExpired(acc.end)) {
                 const subs = acc.subscribers || [];
                 const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
-                cumulativeProfit += collected - parseFloat(acc.cost || 0);
+                const cost = parseFloat(acc.cost || 0);
+                const net = collected - cost;
+                cumulativeProfit += net;
+
+                if (!acc.reports) acc.reports = [];
+                acc.reports.unshift({
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('ar-IQ', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    start: acc.start || '—', end: acc.end || '—',
+                    totalSubs: subs.length,
+                    paidSubs: subs.filter(s => s.paid).length,
+                    unpaidSubs: subs.filter(s => !s.paid).length,
+                    collected, cost, net,
+                    paidList: subs.filter(s => s.paid).map(s => ({ name: s.name, price: s.price || PRICE_PER_SUB })),
+                    unpaidList: subs.filter(s => !s.paid).map(s => ({ name: s.name, tg: s.tg || '', price: s.price || PRICE_PER_SUB }))
+                });
             }
 
             acc.start = startDate;
             acc.end = endStr;
             acc._profitCounted = false;
+            acc._reportSaved = false;
 
             if (acc.subscribers && acc.subscribers.length > 0) {
                 acc.subscribers.forEach(s => { s.date = startDate; });
@@ -4294,7 +4342,111 @@
 
             syncDataToFirebase();
             renderAppSubTable();
+            renderAppReports();
             showToast(`✅ تم تفعيل "${acc.name}" حتى ${endStr}`);
+        }
+
+        // ===== تقارير التطبيقات =====
+        function toggleAppReports() {
+            const section = document.getElementById('appReportsSection');
+            if (!section) return;
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function renderAppReports() {
+            const acc = appAccounts[currentAppDetailIndex];
+            const reports = acc.reports || [];
+            const list = document.getElementById('appReportsList');
+            const btn = document.getElementById('appReportsToggleBtn');
+            if (!list) return;
+
+            if (btn) {
+                btn.innerHTML = reports.length > 0
+                    ? `📅 التقارير <span style="background:rgba(52,152,219,0.3);border-radius:10px;padding:1px 7px;font-size:11px;">${reports.length}</span>`
+                    : `📅 التقارير`;
+            }
+
+            if (reports.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;font-size:12px;padding:16px;">لا توجد تقارير بعد</p>';
+                return;
+            }
+
+            list.innerHTML = reports.map((r, i) => {
+                const isProfit = r.net >= 0;
+                const unpaidList = r.unpaidList || [];
+                return `
+                <div style="background:rgba(0,0,0,0.15);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.25);">📅 ${r.date} | ${r.start} ← ${r.end}</div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <div style="font-size:14px;font-weight:700;color:${isProfit?'#2ecc71':'#e74c3c'};">${isProfit?'+':'-'}${Math.abs(r.net).toLocaleString()} د.ع</div>
+                            <button onclick="deleteAppReport(${i})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:7px;padding:3px 7px;color:#e74c3c;cursor:pointer;font-size:11px;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;">
+                        <div style="background:rgba(212,175,55,0.07);border-radius:7px;padding:6px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">المحصول</div>
+                            <div style="font-size:12px;font-weight:700;color:#d4af37;">+${r.collected.toLocaleString()}</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,0.07);border-radius:7px;padding:6px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">التكلفة</div>
+                            <div style="font-size:12px;font-weight:700;color:#e74c3c;">-${r.cost.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+                        <div style="background:rgba(46,204,113,0.07);border-radius:7px;padding:6px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">✅ دافعون</div>
+                            <div style="font-size:13px;font-weight:700;color:#2ecc71;">${r.paidSubs}</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,0.07);border-radius:7px;padding:6px;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:3px;">❌ غير دافعين (${unpaidList.length})</div>
+                            ${unpaidList.map(s=>`<div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;">
+                                <span style="color:#fff;">${s.name}</span>
+                                <span style="color:#e74c3c;">${s.price.toLocaleString()}</span>
+                            </div>`).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function deleteAppReport(i) {
+            const acc = appAccounts[currentAppDetailIndex];
+            if (!acc.reports) return;
+            acc.reports.splice(i, 1);
+            syncDataToFirebase();
+            renderAppReports();
+            showToast('🗑️ تم حذف التقرير');
+        }
+
+        // ===== فلترة وبحث مشتركي التطبيقات =====
+        let currentAppFilter = 'all';
+
+        function setAppSubFilter(filter) {
+            currentAppFilter = filter;
+            ['all','paid','unpaid'].forEach(f => {
+                const btn = document.getElementById('app-filter-' + f);
+                if (btn) { btn.style.opacity = f === filter ? '1' : '0.6'; btn.style.fontWeight = f === filter ? '700' : '400'; }
+            });
+            renderAppSubTable();
+        }
+
+        function filterAppSubTable(query) {
+            const rows = document.querySelectorAll('#appSubTableBody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        // رسالة تذكير لمشتركي التطبيقات
+        function sendAppReminder(index) {
+            const acc = appAccounts[currentAppDetailIndex];
+            const s = acc.subscribers[index];
+            if (s.paid) { showToast('المشترك دافع بالفعل ✅'); return; }
+            const price = (s.price || PRICE_PER_SUB).toLocaleString();
+            const siteName = localStorage.getItem('siteName') || 'Maryooma Store';
+            const msg = `مرحباً ${s.name} 👋\nتذكير بأن اشتراكك في ${siteName} بمبلغ ${price} د.ع لم يُسدَّد بعد.\nنرجو الدفع في أقرب وقت 🙏`;
+            navigator.clipboard.writeText(msg).then(() => showToast('✅ تم نسخ رسالة التذكير'));
         }
 
         function renderAppSubTable() {
@@ -4302,24 +4454,32 @@
             const subs = acc.subscribers || [];
             const tbody = document.getElementById('appSubTableBody');
             tbody.innerHTML = '';
-            if (subs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="color:rgba(255,255,255,0.3);padding:20px;">لا يوجد مشتركون بعد</td></tr>';
+
+            // تطبيق الفلتر
+            let filtered = [...subs];
+            if (currentAppFilter === 'paid') filtered = subs.filter(s => s.paid);
+            else if (currentAppFilter === 'unpaid') filtered = subs.filter(s => !s.paid);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="color:rgba(255,255,255,0.3);padding:20px;">لا يوجد مشتركون</td></tr>';
             } else {
-                subs.forEach((s, i) => {
+                filtered.forEach((s, i) => {
+                    const realIdx = subs.indexOf(s);
                     const handle = tgHandle(s.tg);
                     const tgCell = handle ? `<a class="tg-link" href="https://t.me/${handle}" target="_blank"><i class="fab fa-telegram"></i></a>` : `<span style="color:rgba(255,255,255,0.2)">—</span>`;
                     const subPrice = s.price !== undefined ? s.price : PRICE_PER_SUB;
                     tbody.innerHTML += `<tr>
-                        <td style="color:#3498db;font-weight:700; white-space:nowrap;">${i+1}</td>
+                        <td style="color:#3498db;font-weight:700;white-space:nowrap;">${i+1}</td>
                         <td style="font-weight:600;color:#fff">${s.name}</td>
                         <td>${tgCell}</td>
                         <td style="color:rgba(255,255,255,0.6);font-size:12px">${s.date||'—'}</td>
-                        <td><button class="status-dot ${s.paid?'paid':'unpaid'}" onclick="toggleAppPaid(${i})"></button></td>
+                        <td><button class="status-dot ${s.paid?'paid':'unpaid'}" onclick="toggleAppPaid(${realIdx})"></button></td>
                         <td><span class="note-text" title="${s.note}">${s.note||'—'}</span></td>
                         <td><span class="price-tag">${subPrice.toLocaleString()}</span></td>
                         <td>
-                            <button class="sub-edit-btn" onclick="openEditAppSubModal(${i})"><i class="fas fa-edit"></i></button>
-                            <button class="sub-del-btn" onclick="deleteAppSub(${i})"><i class="fas fa-trash"></i></button>
+                            <button class="sub-edit-btn" onclick="openEditAppSubModal(${realIdx})"><i class="fas fa-edit"></i></button>
+                            <button class="sub-del-btn" onclick="deleteAppSub(${realIdx})"><i class="fas fa-trash"></i></button>
+                            ${!s.paid ? `<button onclick="sendAppReminder(${realIdx})" style="background:rgba(231,76,60,0.1);border:none;border-radius:6px;padding:4px 6px;color:#e74c3c;cursor:pointer;font-size:11px;" title="رسالة تذكير"><i class="fas fa-bell"></i></button>` : ''}
                         </td>
                     </tr>`;
                 });
