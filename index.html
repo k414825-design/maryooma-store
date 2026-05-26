@@ -773,7 +773,7 @@
                     border-radius:14px; padding:13px 16px; color:#d4af37;
                     font-family:'Cairo'; font-size:13px; font-weight:700; cursor:pointer;
                     display:flex; align-items:center; gap:6px; white-space:nowrap;
-                "><i class="fas fa-history"></i> التقارير</button>
+                ">📅 التقارير</button>
             </div>
             <span class="back-link" onclick="showView('accountsManagementView')">← العودة للحسابات</span>
 
@@ -1522,7 +1522,7 @@
 
         let editIndex = -1;
         const viewHistory = [];
-        const CACHE_VERSION = 'v4';
+        const CACHE_VERSION = 'v5';
 
         // مسح الكاش القديم عند تحديث الكود
         try {
@@ -2556,27 +2556,21 @@
             const reports = acc.reports || [];
             const section = document.getElementById('accountReportsSection');
             const list = document.getElementById('accountReportsList');
-            const count = document.getElementById('accountReportsCount');
             const btn = document.getElementById('reportsToggleBtn');
             if (!section || !list) return;
 
-            // تحديث الزر دائماً
+            // تحديث نص الزر مع العدد
             if (btn) {
-                btn.style.display = 'flex';
-                if (reports.length > 0) {
-                    btn.innerHTML = `<i class="fas fa-history"></i> 📅 التقارير <span style="background:rgba(212,175,55,0.3);border-radius:10px;padding:1px 7px;font-size:11px;">${reports.length}</span>`;
-                } else {
-                    btn.innerHTML = `<i class="fas fa-history"></i> 📅 التقارير`;
-                }
+                btn.innerHTML = reports.length > 0
+                    ? `📅 التقارير <span style="background:rgba(212,175,55,0.3);border-radius:10px;padding:1px 7px;font-size:11px;">${reports.length}</span>`
+                    : `📅 التقارير`;
             }
-
-            if (count) count.textContent = reports.length + ' تقرير';
 
             // القسم مخفي افتراضياً
             section.style.display = 'none';
 
             if (reports.length === 0) {
-                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;font-size:12px;padding:16px;">لا توجد تقارير بعد — ستُضاف عند تفعيل الحساب المنتهي</p>';
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;font-size:12px;padding:16px;">لا توجد تقارير بعد</p>';
                 return;
             }
 
