@@ -1499,6 +1499,17 @@
 
         let editIndex = -1;
         const viewHistory = [];
+        const CACHE_VERSION = 'v3';
+
+        // مسح الكاش القديم عند تحديث الكود
+        try {
+            const savedVersion = localStorage.getItem('cacheVersion');
+            if (savedVersion !== CACHE_VERSION) {
+                localStorage.removeItem('maryoomaCache');
+                localStorage.setItem('cacheVersion', CACHE_VERSION);
+            }
+        } catch(e) {}
+
         let isDataLoaded = false;
         let rememberMe = false;
         let savedCredentials = null;
