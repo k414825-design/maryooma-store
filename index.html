@@ -13,7 +13,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -560,6 +559,14 @@
             <div style="background:linear-gradient(135deg,#3498db,#2980b9);border-radius:12px;padding:9px;color:#fff;font-weight:700;font-size:13px;">فتح التطبيقات</div>
         </div>
 
+        <!-- بطاقة التقارير -->
+        <div class="info-card" onclick="showView('reportsView')" style="cursor:pointer;padding:28px 16px;border-color:rgba(155,89,182,0.3);">
+            <div style="font-size:42px;margin-bottom:12px;">📊</div>
+            <h3 style="font-size:17px;margin:0 0 6px;color:#fff;">التقارير</h3>
+            <p style="font-size:12px;margin:0 0 16px;color:rgba(255,255,255,0.4);">تقارير الحسابات الشهرية</p>
+            <div style="background:linear-gradient(135deg,#9b59b6,#8e44ad);border-radius:12px;padding:9px;color:#fff;font-weight:700;font-size:13px;">فتح التقارير</div>
+        </div>
+
         <!-- بطاقة الإعدادات -->
         <div class="info-card" onclick="showView('settingsView')" style="cursor:pointer;padding:28px 16px;border-color:rgba(149,165,166,0.3);">
             <div style="font-size:42px;margin-bottom:12px;">⚙️</div>
@@ -568,14 +575,23 @@
             <div style="background:linear-gradient(135deg,#7f8c8d,#636e72);border-radius:12px;padding:9px;color:#fff;font-weight:700;font-size:13px;">فتح الإعدادات</div>
         </div>
 
-        <!-- بطاقة سلة المهملات -->
-        <div class="info-card" onclick="showView('trashView')" style="cursor:pointer;padding:28px 16px;border-color:rgba(231,76,60,0.25);">
-            <div style="font-size:42px;margin-bottom:12px;">🗑️</div>
-            <h3 style="font-size:17px;margin:0 0 6px;color:#fff;">سلة المهملات</h3>
-            <p style="font-size:12px;margin:0 0 16px;color:rgba(255,255,255,0.4);">العناصر المحذوفة</p>
-            <div style="background:linear-gradient(135deg,#e74c3c,#c0392b);border-radius:12px;padding:9px;color:#fff;font-weight:700;font-size:13px;">فتح السلة</div>
-        </div>
+    </div>
 
+    <!-- قائمة الحسابات المنتهية -->
+    <div id="reportsView" class="view hidden">
+        <div class="card" style="padding:24px;">
+            <h2 style="text-align:center;margin:0 0 20px;font-size:20px;color:#9b59b6;">📊 التقارير</h2>
+
+            <!-- تبويبات -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;background:rgba(255,255,255,0.04);border-radius:14px;padding:6px;">
+                <button onclick="switchReportsTab('chatgpt')" id="rtab-chatgpt" style="flex:1;padding:8px;border-radius:10px;border:none;font-family:'Cairo';font-size:12px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#d4af37,#b88d3e);color:#1a1a1a;">🤖 ChatGPT</button>
+                <button onclick="switchReportsTab('monthly')" id="rtab-monthly" style="flex:1;padding:8px;border-radius:10px;border:none;font-family:'Cairo';font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:rgba(255,255,255,0.4);">🔄 شهرية</button>
+                <button onclick="switchReportsTab('yearly')" id="rtab-yearly" style="flex:1;padding:8px;border-radius:10px;border:none;font-family:'Cairo';font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:rgba(255,255,255,0.4);">🗓️ سنوية</button>
+            </div>
+
+            <div id="reportsViewList"></div>
+            <span class="back-link" onclick="showView('dashboardView')">← العودة للرئيسي</span>
+        </div>
     </div>
 
     <!-- قائمة الحسابات المنتهية -->
@@ -760,21 +776,13 @@
             </div>
 
             <!-- زر التفعيل - يظهر فقط للحسابات المنتهية -->
-            <!-- زر التفعيل وزر التقرير -->
-            <div style="display:flex;gap:8px;margin:14px 0 4px;">
-                <button id="activateAccountBtn" onclick="activateAccountDetail()" style="
-                    flex:1; background:linear-gradient(135deg,#2ecc71,#27ae60);
-                    border:none; border-radius:14px; padding:13px; color:#fff;
-                    font-family:'Cairo'; font-size:15px; font-weight:700; cursor:pointer;
-                    display:flex; align-items:center; justify-content:center; gap:8px;
-                "><i class="fas fa-play"></i> تفعيل</button>
-                <button onclick="toggleAccountReports()" id="reportsToggleBtn" style="
-                    background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3);
-                    border-radius:14px; padding:13px 16px; color:#d4af37;
-                    font-family:'Cairo'; font-size:13px; font-weight:700; cursor:pointer;
-                    display:flex; align-items:center; gap:6px; white-space:nowrap;
-                ">📅 التقارير</button>
-            </div>
+            <button id="activateAccountBtn" onclick="activateAccountDetail()" style="
+                width:100%; background:linear-gradient(135deg,#2ecc71,#27ae60);
+                border:none; border-radius:14px; padding:13px; color:#fff;
+                font-family:'Cairo'; font-size:15px; font-weight:700; cursor:pointer;
+                display:flex; align-items:center; justify-content:center; gap:8px;
+                margin:14px 0 4px;
+            "><i class="fas fa-play"></i> تفعيل</button>
             <span class="back-link" onclick="showView('accountsManagementView')">← العودة للحسابات</span>
 
             <!-- جدول المشتركين -->
@@ -1205,33 +1213,6 @@
         <div class="card" style="padding:28px;">
             <h2 style="text-align:center; margin:0 0 24px; font-size:20px;">⚙️ الإعدادات</h2>
 
-            <!-- وضع الإضاءة -->
-            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:20px; margin-bottom:20px;">
-                <h3 style="color:var(--primary-gold); margin:0 0 16px; font-size:16px; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-sun"></i> المظهر
-                </h3>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="color:var(--text-color);font-size:14px;">الوضع الفاتح (Light Mode)</span>
-                    <label style="position:relative;display:inline-block;width:52px;height:28px;">
-                        <input type="checkbox" id="lightModeToggle" onchange="toggleLightMode(this.checked)" style="opacity:0;width:0;height:0;">
-                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.1);border-radius:28px;transition:0.3s;" id="lightModeSlider">
-                            <span style="position:absolute;content:'';height:20px;width:20px;left:4px;bottom:4px;background:white;border-radius:50%;transition:0.3s;" id="lightModeThumb"></span>
-                        </span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- تخصيص اسم الموقع -->
-            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:20px; margin-bottom:20px;">
-                <h3 style="color:var(--primary-gold); margin:0 0 16px; font-size:16px; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-pen"></i> اسم الموقع
-                </h3>
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span id="siteNameDisplay" style="color:var(--text-color);font-size:14px;"></span>
-                    <button onclick="editSiteName()" style="background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:10px;padding:6px 14px;color:#d4af37;font-family:'Cairo';font-size:12px;cursor:pointer;">تعديل ✏️</button>
-                </div>
-            </div>
-
             <!-- تثبيت كتطبيق PWA -->
             <div id="pwaInstallBtn" style="display:none;background:rgba(52,152,219,0.06); border:1px solid rgba(52,152,219,0.3); border-radius:20px; padding:20px; margin-bottom:20px;">
                 <h3 style="color:#3498db; margin:0 0 12px; font-size:16px;"><i class="fas fa-mobile-alt"></i> تثبيت كتطبيق</h3>
@@ -1265,9 +1246,13 @@
 
             <!-- نسخ احتياطي -->
             <div style="margin-top:8px;">
-                <button onclick="showView('backupView')" style="width:100%;background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.3);border-radius:14px;padding:14px;color:#3498db;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
+                <button onclick="showView('backupView')" style="width:100%;background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.3);border-radius:14px;padding:14px;color:#3498db;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">
                     <div style="font-size:24px;margin-bottom:6px;">💾</div>
                     نسخ احتياطي
+                </button>
+                <button onclick="showView('trashView')" style="width:100%;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:14px;padding:14px;color:#e74c3c;font-family:'Cairo';font-size:13px;font-weight:700;cursor:pointer;">
+                    <div style="font-size:24px;margin-bottom:6px;">🗑️</div>
+                    سلة المهملات
                 </button>
             </div>
 
@@ -1537,7 +1522,7 @@
 
         let editIndex = -1;
         const viewHistory = [];
-        const CACHE_VERSION = 'v5';
+        const CACHE_VERSION = 'v6';
 
         // مسح الكاش القديم عند تحديث الكود
         try {
@@ -2556,15 +2541,8 @@
         }
 
         // ========== الرسم البياني ==========
-        let profitChartInstance = null;
-        function deleteReport(index) {
-            const acc = accounts[currentDetailIndex];
-            if (!acc.reports || !acc.reports[index]) return;
-            acc.reports.splice(index, 1);
-            syncDataToFirebase();
-            renderAccountReports();
-            showToast('🗑️ تم حذف التقرير');
-        }
+
+
 
         function toggleAccountReports() {
             const section = document.getElementById('accountReportsSection');
@@ -2640,6 +2618,110 @@
             }).join('');
         }
 
+        // ===== صفحة التقارير المركزية =====
+        let currentReportsTab = 'chatgpt';
+
+        function switchReportsTab(tab) {
+            currentReportsTab = tab;
+            ['chatgpt','monthly','yearly'].forEach(t => {
+                const btn = document.getElementById('rtab-' + t);
+                if (!btn) return;
+                btn.style.background = t === tab ? 'linear-gradient(135deg,#9b59b6,#8e44ad)' : 'transparent';
+                btn.style.color = t === tab ? '#fff' : 'rgba(255,255,255,0.4)';
+            });
+            renderReportsView();
+        }
+
+        function renderReportsView() {
+            const list = document.getElementById('reportsViewList');
+            if (!list) return;
+
+            let allReports = [];
+
+            if (currentReportsTab === 'chatgpt') {
+                accounts.forEach(acc => {
+                    (acc.reports || []).forEach(r => {
+                        allReports.push({ ...r, accountName: acc.name, type: 'chatgpt' });
+                    });
+                });
+            } else {
+                appAccounts.filter(acc => acc.category === currentReportsTab).forEach(acc => {
+                    (acc.reports || []).forEach(r => {
+                        allReports.push({ ...r, accountName: acc.name, type: acc.category });
+                    });
+                });
+            }
+
+            // ترتيب من الأحدث للأقدم
+            allReports.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            if (allReports.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;padding:30px;font-size:13px;">لا توجد تقارير بعد</p>';
+                return;
+            }
+
+            list.innerHTML = allReports.map((r, i) => {
+                const isProfit = r.net >= 0;
+                const unpaidList = r.unpaidList || [];
+                return `
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px;margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                        <div>
+                            <div style="font-weight:700;font-size:15px;color:#fff;">📁 ${r.accountName}</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">${r.start} ← ${r.end}</div>
+                            <div style="font-size:10px;color:rgba(255,255,255,0.2);">📅 ${r.date}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="font-size:15px;font-weight:700;color:${isProfit?'#2ecc71':'#e74c3c'};">
+                                ${isProfit?'+':'-'}${Math.abs(r.net).toLocaleString()} د.ع
+                            </div>
+                            <button onclick="deleteReport('${currentReportsTab}','${r.accountName}',${r.id})" style="background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:4px 8px;color:#e74c3c;cursor:pointer;font-size:12px;">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+                        <div style="background:rgba(212,175,55,0.07);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">المحصول</div>
+                            <div style="font-size:12px;font-weight:700;color:#d4af37;">+${r.collected.toLocaleString()} د.ع</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,0.07);border-radius:8px;padding:8px;text-align:center;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">التكلفة</div>
+                            <div style="font-size:12px;font-weight:700;color:#e74c3c;">-${r.cost.toLocaleString()} د.ع</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:8px;align-items:flex-start;">
+                        <div style="background:rgba(46,204,113,0.07);border-radius:8px;padding:8px;text-align:center;min-width:60px;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);">✅ دافعون</div>
+                            <div style="font-size:14px;font-weight:700;color:#2ecc71;">${r.paidSubs}</div>
+                        </div>
+                        ${unpaidList.length > 0 ? `
+                        <div style="flex:1;background:rgba(231,76,60,0.07);border-radius:8px;padding:8px;">
+                            <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:4px;">❌ غير دافعين (${unpaidList.length})</div>
+                            ${unpaidList.map(s => `
+                            <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                                <span style="color:#fff;">${s.name}</span>
+                                <span style="color:#e74c3c;">${s.price.toLocaleString()} د.ع</span>
+                            </div>`).join('')}
+                        </div>` : `<div style="flex:1;background:rgba(46,204,113,0.05);border-radius:8px;padding:8px;text-align:center;font-size:11px;color:#2ecc71;">الجميع دفعوا ✅</div>`}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function deleteReport(tab, accountName, reportId) {
+            if (tab === 'chatgpt') {
+                const acc = accounts.find(a => a.name === accountName);
+                if (acc) acc.reports = (acc.reports || []).filter(r => r.id !== reportId);
+            } else {
+                const acc = appAccounts.find(a => a.name === accountName && a.category === tab);
+                if (acc) acc.reports = (acc.reports || []).filter(r => r.id !== reportId);
+            }
+            syncDataToFirebase();
+            renderReportsView();
+            showToast('🗑️ تم حذف التقرير');
+        }
+
         function renderReportsHistory() {
             const list = document.getElementById('reportsHistoryList');
             if (!list) return;
@@ -2699,50 +2781,7 @@
             showToast('✅ تم مسح التقارير');
         }
 
-        function renderProfitChart() {
-            const canvas = document.getElementById('profitChart');
-            if (!canvas) return;
-            if (profitChartInstance) profitChartInstance.destroy();
 
-            const months = [];
-            const profits = [];
-            const today = new Date();
-
-            for (let i = 5; i >= 0; i--) {
-                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                months.push(d.toLocaleDateString('ar-IQ', { month: 'short', year: '2-digit' }));
-                let monthProfit = 0;
-                accounts.forEach(acc => {
-                    const subs = acc.subscribers || [];
-                    const collected = subs.filter(s => s.paid).reduce((sum, s) => sum + (s.price !== undefined ? s.price : PRICE_PER_SUB), 0);
-                    monthProfit += collected - parseFloat(acc.cost || 0);
-                });
-                profits.push(monthProfit);
-            }
-
-            profitChartInstance = new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'صافي الربح (د.ع)',
-                        data: profits,
-                        backgroundColor: profits.map(p => p >= 0 ? 'rgba(46,204,113,0.6)' : 'rgba(231,76,60,0.6)'),
-                        borderColor: profits.map(p => p >= 0 ? '#2ecc71' : '#e74c3c'),
-                        borderWidth: 2,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { labels: { color: '#d4af37', font: { family: 'Cairo' } } } },
-                    scales: {
-                        x: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
-                }
-            });
-        }
 
         function doLogin() {
             const username = document.getElementById('loginUsername').value.trim();
@@ -2818,6 +2857,7 @@
             if (viewId === 'settingsView') renderSettings();
             if (viewId === 'expiredAccountsView') renderExpiredAccounts();
             if (viewId === 'backupView') setTimeout(renderMonthlyReport, 100);
+            if (viewId === 'reportsView') { currentReportsTab = 'chatgpt'; switchReportsTab('chatgpt'); }
             viewHistory.push(viewId);
 
             // إضافة للتاريخ حتى يعمل زر الرجوع في الهاتف
@@ -2884,13 +2924,6 @@
             });
             // إضافة الأرباح التراكمية (من الحسابات المفعّلة سابقاً)
             const totalProfit = grandNet + cumulativeProfit;
-
-            const totalEl = document.getElementById('storeTotalValue');
-            if (totalEl) {
-                const isProfit = totalProfit >= 0;
-                totalEl.textContent = (isProfit ? '+' : '-') + ' ' + Math.abs(totalProfit).toLocaleString() + ' د.ع';
-                totalEl.style.color = isProfit ? '#2ecc71' : '#e74c3c';
-            }
 
             // تحديث مربع الملخص
             const cgA = document.getElementById('cgTotalAccounts');
@@ -3605,16 +3638,7 @@
         }
 
         // حذف مشترك → سلة
-        function deleteSub(idx) {
-            const acc = accounts[currentDetailIndex];
-            const sub = acc.subscribers[idx];
-            if (!confirm(`هل تريد حذف المشترك "${sub.name}"؟`)) return;
-            const deleted = acc.subscribers.splice(idx, 1)[0];
-            deleted._type = 'subscriber'; deleted._parentName = acc.name;
-            trash.push(deleted);
-            renderSubTable();
-            showToast('🗑️ تم نقل المشترك للسلة');
-        }
+
 
         // تبديل حالة الدفع
         function togglePaid(idx) {
@@ -4641,16 +4665,7 @@
         // سلة المهملات
 
         // حذف حساب ChatGPT → إلى السلة
-        function deleteAccount(index) {
-            const acc = accounts[index];
-            if (!confirm(`هل تريد حذف الحساب "${acc.name}"؟`)) return;
-            const deleted = accounts.splice(index, 1)[0];
-            deleted.deletedAt = new Date().toLocaleDateString('ar-IQ');
-            deleted._type = 'account';
-            trash.push(deleted);
-            renderAccounts();
-            showToast('🗑️ تم النقل إلى السلة');
-        }
+
 
         // عرض السلة
         function renderTrash() {
